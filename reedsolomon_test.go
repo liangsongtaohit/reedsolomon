@@ -64,40 +64,40 @@ func TestEncoding(t *testing.T) {
 //	}
 //}
 
-//func TestOneEncode(t *testing.T) {
-//	codec, err := New(5, 5)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//	shards := [][]byte{
-//		{0, 1},
-//		{4, 5},
-//		{2, 3},
-//		{6, 7},
-//		{8, 9},
-//		{0, 0},
-//		{0, 0},
-//		{0, 0},
-//		{0, 0},
-//		{0, 0},
-//	}
-//	codec.Encode(shards)
-//	if shards[5][0] != 97 || shards[5][1] != 64 {
-//		t.Fatal("shard 5 mismatch")
-//	}
-//	if shards[6][0] != 173 || shards[6][1] != 3 {
-//		t.Fatal("shard 6 mismatch")
-//	}
-//	if shards[7][0] != 218 || shards[7][1] != 14 {
-//		t.Fatal("shard 7 mismatch")
-//	}
-//	if shards[8][0] != 107 || shards[8][1] != 35 {
-//		t.Fatal("shard 8 mismatch")
-//	}
-//	if shards[9][0] != 110 || shards[9][1] != 177 {
-//		t.Fatal("shard 9 mismatch")
-//	}
-//}
+func TestOneEncode(t *testing.T) {
+	codec, err := New(5, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	shards := [][]byte{
+		{0, 1},
+		{4, 5},
+		{2, 3},
+		{6, 7},
+		{8, 9},
+		{0, 0},
+		{0, 0},
+		{0, 0},
+		{0, 0},
+		{0, 0},
+	}
+	codec.Encode(shards)
+	if shards[5][0] != 97 || shards[5][1] != 64 {
+		t.Fatal("shard 5 mismatch")
+	}
+	if shards[6][0] != 173 || shards[6][1] != 3 {
+		t.Fatal("shard 6 mismatch")
+	}
+	if shards[7][0] != 218 || shards[7][1] != 14 {
+		t.Fatal("shard 7 mismatch")
+	}
+	if shards[8][0] != 107 || shards[8][1] != 35 {
+		t.Fatal("shard 8 mismatch")
+	}
+	if shards[9][0] != 110 || shards[9][1] != 177 {
+		t.Fatal("shard 9 mismatch")
+	}
+}
 
 func fillRandom(p []byte) {
 	for i := 0; i < len(p); i += 7 {

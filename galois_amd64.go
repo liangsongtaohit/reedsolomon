@@ -39,31 +39,41 @@ func gfMulAVX2(low, high, in, out []byte)
 func gfMulRemainAVX2(coeff byte, input, output []byte, size int) {
 	var done int
 	remain := size -32
-	if remain >= 0 {
-		gfMulAVX2(mulTableLow[coeff][:], mulTableHigh[coeff][:], input, output)
-		done = (size >> 5) << 5
-		remain = size - done
-	}
-	if remain > 0 {
+	if remain < 0 {
 		mt := mulTable[coeff]
 		for i := done; i < size; i++ {
 			output[i] = mt[input[i]]
+		}
+	} else {
+		gfMulAVX2(mulTableLow[coeff][:], mulTableHigh[coeff][:], input, output)
+		done = (size >> 5) << 5
+		remain = size - done
+		if remain > 0 {
+			mt := mulTable[coeff]
+			for i := done; i < size; i++ {
+				output[i] = mt[input[i]]
+			}
 		}
 	}
 }
 
 func gfMulRemainXorAVX2(coeff byte, input, output []byte, size int) {
 	var done int
-	remain := size -32
-	if remain >= 0 {
-		gfMulXorAVX2(mulTableLow[coeff][:], mulTableHigh[coeff][:], input, output)
-		done = (size >> 5) << 5
-		remain = size - done
-	}
-	if remain > 0 {
+	remain := size - 32
+	if remain < 0 {
 		mt := mulTable[coeff]
 		for i := done; i < size; i++ {
 			output[i] ^= mt[input[i]]
+		}
+	} else {
+		gfMulXorAVX2(mulTableLow[coeff][:], mulTableHigh[coeff][:], input, output)
+		done = (size >> 5) << 5
+		remain = size - done
+		if remain > 0 {
+			mt := mulTable[coeff]
+			for i := done; i < size; i++ {
+				output[i] ^= mt[input[i]]
+			}
 		}
 	}
 }
