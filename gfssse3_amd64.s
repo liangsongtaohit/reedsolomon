@@ -55,7 +55,7 @@ loop:
 
 	// combine low, high 4-bit & output
 	PXOR    X6, X7
-	MOVOU   X7, (DX)
+	MOVOU   X7, (BX)
 
 	// prepare next loop
 	ADDQ    $16, AX  // in+=16
@@ -114,7 +114,7 @@ loop:
 	// combine low, high 4-bit & output
 	PXOR    X6, X7
 	PXOR    X8, X7  // result_update
-	MOVOU   X7, (DX)
+	MOVOU   X7, (BX)
 
 	// prepare next loop
 	ADDQ    $16, AX  // in+=16

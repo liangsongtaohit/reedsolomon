@@ -76,48 +76,4 @@ func encodeAVX2Worker(offsets chan [2]int, wg *sync.WaitGroup, gen, input, outpu
 		}
 	}
 }
-//func encodeNormal(encodingMatrix, inputs, outputs matrix, numInput, numOutput, size int) {
-//
-//	offsets := make(chan [2]int, worker)
-//	wg := &sync.WaitGroup{}
-//	wg.Add(worker)
-//	for i := 1; i <= worker; i++ {
-//		go encodeNormalWorker(offsets, wg, encodingMatrix, inputs, outputs, numInput, numOutput)
-//	}
-//
-//	start := 0
-//	do := sizePerRoutine
-//	for start < size {
-//		if start+do > size {
-//			do = size - start
-//		}
-//		offset := [2]int{start, do}
-//		offsets <- offset
-//		start = start + do
-//	}
-//	close(offsets)
-//	wg.Wait()
-//}
 
-
-
-//func encodeNormalWorker(offsets chan [2]int, wg *sync.WaitGroup, encodingMatrix, inputs, outputs matrix, numInput, numOutput int) {
-//
-//	defer wg.Done()
-//	for offset := range offsets {
-//		start := offset[0]
-//		do := offset[1]
-//		end := start + do
-//		for i := 0; i < numInput; i++ {
-//			input := inputs[i]
-//			for oi := 0; oi < numOutput; oi++ {
-//				ei := encodingMatrix[oi][i]
-//				if i == 0 {
-//					gfMulSliceAVX2(ei, input[start:end], outputs[oi][start:end], do)
-//				} else {
-//					gfMulSliceXorAVX2(ei, input[start:end], outputs[oi][start:end], do)
-//				}
-//			}
-//		}
-//	}
-//}

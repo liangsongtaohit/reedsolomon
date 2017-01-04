@@ -3,7 +3,6 @@ package reedsolomon
 import (
 	"math/rand"
 	"testing"
-	//"golang.org/x/tools/go/gcimporter15/testdata"
 )
 
 func TestEncoding(t *testing.T) {
@@ -22,7 +21,7 @@ func TestEncoding(t *testing.T) {
 		fillRandom(shards[s])
 	}
 	
-	err = r.Encode(shards)
+	err = r.Encode(shards, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,10 +35,24 @@ func TestEncoding(t *testing.T) {
 	//}
 }
 
+//func TestAVX2(t *testing.T) {
+//
+//	low := []uint8{0x0, 0x2, 0x4, 0x6, 0x8, 0xa, 0xc, 0xe, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1a, 0x1c, 0x1e}
+//	high := []uint8{0x0, 0x20, 0x40, 0x60, 0x80, 0xa0, 0xc0, 0xe0, 0x1d, 0x3d, 0x5d, 0x7d, 0x9d, 0xbd, 0xdd, 0xfd}
+//
+//	in := []uint8{11, 112, 113, 114, 12, 116, 117, 118, 119, 110, 211, 212, 213, 214, 215, 20,
+//		11, 112, 113, 114, 12, 116, 117, 118, 119, 110, 211, 212, 213, 214, 215, 20}
+//	out := make([]byte,32)
+//	gfMulAVX2(low, high, in, out)
+//	fmt.Println(out)
+//}
+
 //func TestASMEncode(t *testing.T) {
+//
+//
 //	NumData := 10
 //	NumParity := 4
-//	shardSize := 512 * 1024
+//	shardSize := 32
 //	r, err := New(NumData, NumParity)
 //	if err != nil {
 //		t.Fatal(err)
@@ -53,15 +66,102 @@ func TestEncoding(t *testing.T) {
 //	for s := 0; s < NumData; s++ {
 //		fillRandom(shards[s])
 //	}
-//
-//	b.SetBytes(int64(shardSize * dataShards))
-//	b.ResetTimer()
-//	for i := 0; i < b.N; i++ {
-//		err = r.Encode(shards)
-//		if err != nil {
-//			b.Fatal(err)
-//		}
+//	err = r.Encode(shards, 0)
+//	if err != nil {
+//		t.Fatal(err)
 //	}
+//	fmt.Println("avx",shards[NumData:])
+//
+//	//parityA := make([][]byte, NumParity)
+//	//for i := range parityA {
+//	//	parityA[i] = shards[NumData+i]
+//	//}
+//
+//	err = r.Encode(shards, 2)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	fmt.Println("noasm", shards[NumData:])
+//	fmt.Println("gen", r.gen)
+//	fmt.Println("shards", shards)
+//	//parityN := shards[NumData:]
+//	//for i := 0; i < NumParity; i++ {
+//	//	for j := 0; j < shardSize; j++ {
+//	//		if parityA[i][j] != parityN[i][j] {
+//	//			t.Fatal("asm:",parityA[i][j],"noasm:",parityN[i][j])
+//	//		}
+//	//	}
+//	//}
+//}
+//
+//func TestASMEncode(t *testing.T) {
+//
+//	NumData := 10
+//	NumParity := 4
+//	shardSize := 32
+//	r, err := New(NumData, NumParity)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	shards := make([][]byte, NumData + NumParity)
+//	for s := range shards {
+//		shards[s] = make([]byte, shardSize)
+//	}
+//
+//	for s := 0; s < NumData; s++ {
+//		fillRegular(shards[s], s)
+//	}
+//	err = r.Encode(shards, 0)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	fmt.Println("avx", shards[NumData:])
+//}
+//
+//func TestNOASMEncode(t *testing.T) {
+//
+//	NumData := 10
+//	NumParity := 4
+//	shardSize := 32
+//	r, err := New(NumData, NumParity)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	shards := make([][]byte, NumData + NumParity)
+//	for s := range shards {
+//		shards[s] = make([]byte, shardSize)
+//	}
+//
+//	for s := 0; s < NumData; s++ {
+//		fillRegular(shards[s], s)
+//	}
+//	err = r.Encode(shards, 2)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	fmt.Println("noavx", shards[NumData:])
+//}
+	//
+	////parityA := make([][]byte, NumParity)
+	////for i := range parityA {
+	////	parityA[i] = shards[NumData+i]
+	////}
+	//
+	//err = r.Encode(shards, 2)
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//fmt.Println("noasm", shards[NumData:])
+	//fmt.Println("gen", r.gen)
+	//fmt.Println("shards", shards)
+	////parityN := shards[NumData:]
+	//for i := 0; i < NumParity; i++ {
+	//	for j := 0; j < shardSize; j++ {
+	//		if parityA[i][j] != parityN[i][j] {
+	//			t.Fatal("asm:",parityA[i][j],"noasm:",parityN[i][j])
+	//		}
+	//	}
+	//}
 //}
 
 func TestOneEncode(t *testing.T) {
@@ -81,7 +181,7 @@ func TestOneEncode(t *testing.T) {
 		{0, 0},
 		{0, 0},
 	}
-	codec.Encode(shards)
+	codec.Encode(shards, 2)
 	if shards[5][0] != 97 || shards[5][1] != 64 {
 		t.Fatal("shard 5 mismatch")
 	}
@@ -96,6 +196,17 @@ func TestOneEncode(t *testing.T) {
 	}
 	if shards[9][0] != 110 || shards[9][1] != 177 {
 		t.Fatal("shard 9 mismatch")
+	}
+}
+
+func fillRegular(p []byte, s int)  {
+	size := len(p)
+	for i := 0; i < size; i++ {
+		v := i + s
+		for v > 255 {
+			v = v - 255
+		}
+		p[i] = byte(v)
 	}
 }
 
@@ -118,16 +229,16 @@ func benchmarkEncode(b *testing.B, dataShards, parityShards, shardSize int) {
 	for s := range shards {
 		shards[s] = make([]byte, shardSize)
 	}
-	
+
 	rand.Seed(0)
 	for s := 0; s < dataShards; s++ {
 		fillRandom(shards[s])
 	}
-	
+
 	b.SetBytes(int64(shardSize * dataShards))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err = r.Encode(shards)
+		err = r.Encode(shards, 0)
 		if err != nil {
 			b.Fatal(err)
 		}

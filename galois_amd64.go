@@ -78,6 +78,20 @@ func gfMulRemainXorAVX2(coeff byte, input, output []byte, size int) {
 	}
 }
 
+func galMulSlice(c byte, in, out []byte) {
+	mt := mulTable[c]
+	for n, input := range in {
+		out[n] = mt[input]
+	}
+}
+
+func galMulSliceXor(c byte, in, out []byte) {
+	mt := mulTable[c]
+	for n, input := range in {
+		out[n] ^= mt[input]
+	}
+}
+
 func gfSliceMulSSSE3(coeff byte, input, output []byte, size int) {
 
 	var done int

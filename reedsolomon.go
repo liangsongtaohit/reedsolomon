@@ -50,7 +50,7 @@ func New(d, p int) (*reedSolomon, error) {
 
 // Encode : cauchy_matrix * data_matrix(input) -> parity_matrix(output)
 // dp : data_matrix + parity_matrix(empty now)
-func (r reedSolomon) Encode(dp matrix) error {
+func (r reedSolomon) Encode(dp matrix, cpuINS int) error {
 	// check matrix row number
 	if len(dp) != r.shards {
 		return errTooFewShards
@@ -64,16 +64,17 @@ func (r reedSolomon) Encode(dp matrix) error {
 
 	// encoding
 	input := dp[0:r.data]
-	output := dp[r.parity:]
+	output := dp[r.data:]
 
-	//cpuINS = checkCPUINS()
+	//cpuINS := checkCPUINS()
 	//unitSize := calcUnit()
 	unitSize := 32768
 	if size < unitSize {
 		unitSize = size
 	}
-	//if cpuINS == 0 {
+	if cpuINS == 0 {
 	encodeAVX2(r.gen, input, output, r.data, r.parity, size, unitSize)
+		//fmt.Println(output)
 	//} else {
 	//	encodeNormal(r.Cauchy, data, parity, r.NumData, r.NumParity, size)
 	//}
@@ -81,9 +82,9 @@ func (r reedSolomon) Encode(dp matrix) error {
 
 	//} else if cpuINS == 1 {
 	//	encodeSSSE3(r.Cauchy, data, parity, r.NumData, r.NumParity, size)
-	//} else {
-	//	encodeNormal(r.Cauchy, data, parity, r.NumData, r.NumParity, size)
-	//}
+	} else {
+		encodeNormal(r.gen, input, output, r.data, r.parity, size, unitSize)
+	}
 	return nil
 }
 
