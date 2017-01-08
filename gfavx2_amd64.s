@@ -13,18 +13,18 @@ TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 	MOVOU (AX), X0
 	MOVOU (BX), X1
 	// [...,X0] -> [X0, X0]
-        VINSERTI128 $1, X0, Y0, Y0      // low_table -> ymm0
-        VINSERTI128 $1, X1, Y1, Y1      // high_table -> ymm1
+    VINSERTI128 $1, X0, Y0, Y0      // low_table -> ymm0
+    VINSERTI128 $1, X1, Y1, Y1      // high_table -> ymm1
 
-        MOVQ  in+48(FP), AX     // in_add -> AX
-        MOVQ  out+72(FP), BX    // out_add -> BX
+    MOVQ  in+48(FP), AX     // in_add -> AX
+    MOVQ  out+72(FP), BX    // out_add -> BX
 
-        // mask -> ymm
-        MOVQ  $15, CX
-        MOVQ  CX, X2
-        VPBROADCASTB X2, Y3
+    // mask -> ymm
+    MOVQ  $15, CX
+    MOVQ  CX, X2
+    VPBROADCASTB X2, Y3
 
-        // if done
+    // if done
 	MOVQ  in_len+56(FP), CX // in_len -> CX
 	SHRQ $5, CX	// CX = CX >> 5 (calc 32bytes per loop)
 	TESTQ CX, CX	// bitwise AND on two operands,if result is 0 (it means no more data)，ZF flag set 1
@@ -34,7 +34,7 @@ loop:
 	// split data byte into two 4-bit
 	VMOVDQU (AX), Y4	// in_data -> ymm4
 	VPSRLQ $4, Y4, Y5	// shift in_data's 4 high bit to low -> ymm5
-        VPAND Y3, Y5, Y5	// mask AND data_shift -> ymm5 (high data)
+    VPAND Y3, Y5, Y5	// mask AND data_shift -> ymm5 (high data)
 	VPAND Y3, Y4, Y4	// mask AND data -> ymm4 (low data)
 
 	// shuffle table
@@ -64,15 +64,15 @@ TEXT ·gfMulXorAVX2(SB), NOSPLIT, $0
 	MOVQ  highTable+24(FP), BX
 	MOVOU (AX), X0
 	MOVOU (BX), X1
-        VINSERTI128 $1, X0, Y0, Y0
-        VINSERTI128 $1, X1, Y1, Y1
+    VINSERTI128 $1, X0, Y0, Y0
+    VINSERTI128 $1, X1, Y1, Y1
 
-        MOVQ  in+48(FP), AX
-        MOVQ  out+72(FP), BX
+    MOVQ  in+48(FP), AX
+    MOVQ  out+72(FP), BX
 
-        MOVQ  $15, CX
-        MOVQ  CX, X2
-        VPBROADCASTB X2, Y3
+    MOVQ  $15, CX
+    MOVQ  CX, X2
+    VPBROADCASTB X2, Y3
 
 	MOVQ  in_len+56(FP), CX
 	SHRQ $5, CX
@@ -83,7 +83,7 @@ loop:
 	VMOVDQU (AX), Y4
 	VMOVDQU (BX), Y8	// out_data -> Ymm
 	VPSRLQ $4, Y4, Y5
-        VPAND Y3, Y5, Y5
+    VPAND Y3, Y5, Y5
 	VPAND Y3, Y4, Y4
 
 	VPSHUFB Y5, Y1, Y6

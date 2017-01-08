@@ -79,7 +79,7 @@ func formatPolynomial(p polynomial) string {
 	} else {
 		strings.TrimSuffix(ps, "+")
 	}
-	
+
 	return ps
 }
 

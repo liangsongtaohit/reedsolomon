@@ -36,11 +36,11 @@ TEXT ·gfMulSSSE3(SB), NOSPLIT, $0
 
 loop:
 	// in_add -> AX; out_add -> BX;
-        // in_len -> CX;
-        // lowTable -> X0; highTable -> X1;
-        // mask -> X3
+    // in_len -> CX;
+    // lowTable -> X0; highTable -> X1;
+    // mask -> X3
 
-        // split data byte into two 4-bit
+    // split data byte into two 4-bit
 	MOVOU	(AX), X4 // in_data -> X4
 	MOVOU   X4, X5  // in_data_copy -> X5
 	PAND    X3, X4  // in_data_low -> X4
@@ -49,7 +49,7 @@ loop:
 
 	// shuffle table
 	MOVOU   X0, X6   // lowTable_copy -> X6
-        MOVOU   X1, X7   // highTable_copy -> X7
+    MOVOU   X1, X7   // highTable_copy -> X7
 	PSHUFB  X4, X6   // lowResult -> X6
 	PSHUFB  X5, X7   // highResult -> X7
 
@@ -107,7 +107,7 @@ loop:
 
 	// shuffle table
 	MOVOU   X0, X6   // lowTable_copy -> X6
-        MOVOU   X1, X7   // highTable_copy -> X7
+    MOVOU   X1, X7   // highTable_copy -> X7
 	PSHUFB  X4, X6   // lowResult -> X6
 	PSHUFB  X5, X7   // highResult -> X7
 

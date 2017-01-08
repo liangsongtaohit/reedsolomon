@@ -1,38 +1,38 @@
 package reedsolomon
 
 import (
+	"errors"
 	"runtime"
 	"sync"
+
+	"github.com/klauspost/cpuid"
 )
 
-var cpuINS int                       // avx2 = 0; ssse3 = 1; (!=avx2 && != ssse3) = 2
+var cpuID int                        // avx2:0; ssse3:1; others: 2
 var pipeline = runtime.GOMAXPROCS(0) // number of goroutines for encoding or decoding
 var unitSize int                     // flow size of per pipeline
 
 // Encode : cauchy_matrix * data_matrix(input) -> parity_matrix(output)
-// dp : data_matrix + parity_matrix(empty now)
-func (r reedSolomon) Encode(dp matrix) error {
-	// check args
+// dp : data_matrix(upper) parity_matrix(lower, empty now)
+func (r *rs) Encode(dp matrix) error {
 	if len(dp) != r.shards {
-		return errTooFewShards
+		return ErrTooFewShards
 	}
-	size, err := checkShardLen(dp, r.shards)
+	size, err := checkShardSize(dp)
 	if err != nil {
 		return err
 	}
-
-	// encoding
 	input := dp[0:r.data]
 	output := dp[r.data:]
-	unitSize = calcUnit()
-	if size < unitSize {
-		unitSize = size
-	}
 	encodeRunner(r.gen, input, output, r.data, r.parity, size)
 	return nil
 }
 
 func encodeRunner(gen, input, output matrix, numData, numParity, size int) {
+	unitSize = unit()
+	if size < unitSize {
+		unitSize = size
+	}
 	do := unitSize
 	offsets := make(chan [2]int, pipeline)
 	wg := &sync.WaitGroup{}
@@ -72,28 +72,61 @@ func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, input, output ma
 	}
 }
 
-func calcUnit() int {
-	cpuINS = checkCPUINS()
-	l1size := checkl1Size()
-	if l1size != -1 {
-		if cpuINS == 0 {
-			f := (l1size / 32) * 32
-			if l1size == f {
-				return l1size
-			} else {
-				return f
+func unit() int {
+	cpuID = id()
+	s := l1Size()
+	if s != 1 {
+		if cpuID == 0 {
+			x := (s / 32) * 32
+			if x == s {
+				return s
 			}
-		} else if cpuINS == 1 {
-			f := (l1size / 16) * 16
-			if l1size == f {
-				return l1size
-			} else {
-				return f
-			}
-		} else {
-			return l1size // don't have avx2 or ssse3
+			return x
 		}
-	} else { // can't get the cacheL1 data size
-		return 32 * 1024
+		if cpuID == 1 {
+			x := (s / 16) * 16
+			if x == s{
+				return s
+			}
+			return x
+		}
+		return s
 	}
+	return 32 * 1024
+}
+
+var ErrShardSize = errors.New("reedsolomon: shards size equal 0 or not match")
+
+func checkShardSize(m matrix) (int, error) {
+
+	size := len(m[0])
+	if size == 0 {
+		return size, ErrShardSize
+	}
+	for _, v := range m {
+		if len(v) != size {
+			return 0, ErrShardSize
+		}
+	}
+	return size, nil
+}
+
+func id() int {
+	if avx2() {
+		return 0
+	}
+	if ssse3() {
+		return 1
+	}
+	return 2
+}
+
+//go:noescape
+func ssse3() bool
+
+//go:noescape
+func avx2() bool
+
+func l1Size() int {
+	return cpuid.CPU.Cache.L1D
 }
