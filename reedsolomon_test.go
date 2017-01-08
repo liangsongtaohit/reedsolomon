@@ -165,11 +165,6 @@ func TestASM(t *testing.T) {
 	}
 }
 
-// Benchmark 10 data shards and 4 parity shards with 32KB each.
-func BenchmarkEncode10x4x32K(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 32*1024)
-}
-
 // Benchmark 10 data shards and 4 parity shards with 64KB each.
 func BenchmarkEncode10x4x64K(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 64*1024)
@@ -198,11 +193,6 @@ func BenchmarkEncode10x4x1M(b *testing.B) {
 // Benchmark 10 data shards and 4 parity shards with 16MB each.
 func BenchmarkEncode10x4x16M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 16*1024*1024)
-}
-
-// Benchmark 28 data shards and 4 parity shards with 32KB each.
-func BenchmarkEncode28x4x32K(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 32*1024)
 }
 
 // Benchmark 28 data shards and 4 parity shards with 64KB each.
@@ -235,11 +225,6 @@ func BenchmarkEncode28x4x16M(b *testing.B) {
 	benchmarkEncode(b, 28, 4, 16*1024*1024)
 }
 
-// Benchmark 14 data shards and 10 parity shards with 32KB each.
-func BenchmarkEncode14x10x32K(b *testing.B) {
-	benchmarkEncode(b, 14, 10, 32*1024)
-}
-
 // Benchmark 14 data shards and 10 parity shards with 1MB each.
 func BenchmarkEncode14x10x1M(b *testing.B) {
 	benchmarkEncode(b, 14, 10, 1024*1024)
@@ -250,25 +235,20 @@ func BenchmarkEncode14x10x16M(b *testing.B) {
 	benchmarkEncode(b, 14, 10, 16*1024*1024)
 }
 
-func benchmarkEncode(b *testing.B, dataShards, parityShards, shardSize int) {
-	r, err := New(dataShards, parityShards)
+func benchmarkEncode(b *testing.B, data, parity, size int) {
+	r, err := New(data, parity)
 	if err != nil {
 		b.Fatal(err)
 	}
-	shards := make([][]byte, dataShards+parityShards)
-	for s := range shards {
-		shards[s] = make([]byte, shardSize)
-	}
-
+	dp := newMatrix(data+parity, size)
 	rand.Seed(0)
-	for s := 0; s < dataShards; s++ {
-		fillRandom(shards[s])
+	for i := 0; i < data; i++ {
+		fillRandom(dp[i])
 	}
-
-	b.SetBytes(int64(shardSize * dataShards))
+	b.SetBytes(int64(size * data))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err = r.Encode(shards)
+		err = r.Encode(dp)
 		if err != nil {
 			b.Fatal(err)
 		}

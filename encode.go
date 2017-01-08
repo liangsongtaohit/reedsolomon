@@ -85,7 +85,7 @@ func unit() int {
 		}
 		if cpuID == 1 {
 			x := (s / 16) * 16
-			if x == s{
+			if x == s {
 				return s
 			}
 			return x

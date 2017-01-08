@@ -29,7 +29,7 @@ func New(d, p int) (*rs, error) {
 		parity: p,
 		shards: d + p,
 	}
-	e := genEncodeMatrix(r.shards, d)   // create encoding matrix
+	e := genEncodeMatrix(r.shards, d) // create encoding matrix
 	r.m = e
 	r.gen = newMatrix(p, d)
 	for i := range r.gen {
