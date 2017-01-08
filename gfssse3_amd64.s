@@ -93,11 +93,11 @@ TEXT ·gfMulXorSSSE3(SB), NOSPLIT, $0
 
 loop:
 	// in_add -> AX; out_add -> BX;
-        // in_len -> CX;
-        // lowTable -> X0; highTable -> X1;
-        // mask -> X3
+    // in_len -> CX;
+    // lowTable -> X0; highTable -> X1;
+    // mask -> X3
 
-        // split data byte into two 4-bit
+    // split data byte into two 4-bit
 	MOVOU	(AX), X4 // in_data -> X4
 	MOVOU   (BX), X8 // out_data -> X8
 	MOVOU   X4, X5  // in_data_copy -> X5

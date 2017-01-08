@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-type matrix [][]byte    // byte[row][col]
+type matrix [][]byte // byte[row][col]
 
 func newMatrix(rows, cols int) matrix {
 	m := matrix(make([][]byte, rows))
@@ -32,7 +32,7 @@ func genEncodeMatrix(rows, cols int) matrix {
 	return m
 }
 
-func (m matrix)invert() (matrix, error) {
+func (m matrix) invert() (matrix, error) {
 	size := len(m)
 	iM := identityMatrix(size)
 	mIM, _ := m.augIM(iM)
@@ -59,7 +59,6 @@ func (m matrix) augIM(iM matrix) (matrix, error) {
 	return result, nil
 }
 
-// errSingular is returned if the matrix is singular and cannot be inversed
 var ErrSingular = errors.New("reedsolomon: matrix is singular")
 
 // (IN|I) -> (I|OUT)
@@ -92,7 +91,7 @@ func (m matrix) gaussJordan() error {
 				m[r][c] = gfMul(m[r][c], scale)
 			}
 		}
-		 //Make everything below the 1 be a 0 by subtracting a multiple of it
+		//Make everything below the 1 be a 0 by subtracting a multiple of it
 		for rowBelow := r + 1; rowBelow < rows; rowBelow++ {
 			if m[rowBelow][r] != 0 {
 				// scale * m[r][r] = scale, scale + scale = 0
@@ -148,4 +147,3 @@ func (m matrix) swapRows(r1, r2 int) {
 func gfMul(a, b byte) byte {
 	return mulTable[a][b]
 }
-

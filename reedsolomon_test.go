@@ -1,9 +1,9 @@
 package reedsolomon
 
 import (
+	"bytes"
 	"math/rand"
 	"testing"
-	"bytes"
 )
 
 func TestEncode(t *testing.T) {
@@ -12,7 +12,7 @@ func TestEncode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dp:= make([][]byte, 13)
+	dp := make([][]byte, 13)
 	for s := range dp {
 		dp[s] = make([]byte, size)
 	}
@@ -103,11 +103,11 @@ func TestReconst(t *testing.T) {
 	lost = append(lost, 4)
 	lost = append(lost, 0)
 	lost = append(lost, 12)
-	err = r.Reconst(shards,lost, true)
+	err = r.Reconst(shards, lost, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(store[0],shards[0]) {
+	if !bytes.Equal(store[0], shards[0]) {
 		t.Fatal("reconst data mismatch: shards[0]")
 	}
 	if !bytes.Equal(store[1], shards[4]) {
@@ -274,7 +274,7 @@ func (r *rs) noasmEncode(dp matrix) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// encoding
 	input := dp[0:r.data]
 	output := dp[r.data:]
