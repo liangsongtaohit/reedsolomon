@@ -10,7 +10,7 @@ It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolom),
 1. Refactoring code
 2. Use Cauchy matrix as generator matrix, we can use it directly.Vandermonde matrix need some operation for preserving the 
 property that any square subset of rows is invertible(and I think there is a way to optimize inverse matrix's performance, I need some time to make it)
-3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it'i log table, exp table, multiply table,
+3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
 4. Use a "pipeline mode" for encoding concurrency. And I found L1Cache Size will be a good choice as the concurrency unit,
 it improve performance greatly
