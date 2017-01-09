@@ -1,6 +1,6 @@
 # Reed-Solomon
 
-Reed-Solomon Erasure Coding engine in Go, with speeds exceeding 2GB/cpu physics core implemented in pure Go.
+Reed-Solomon Erasure Coding engine in Go, with speeds exceeding 3GB/s per physics core implemented in pure Go.
 
  * Coding over in GF(2^8).
  * Primitive Polynomial: x^8 + x^4 + x^3 + x^2 + 1 (0x1d)
@@ -13,7 +13,7 @@ property that any square subset of rows is invertible(and I think there is a way
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
 4. Use a "pipeline mode" for encoding concurrency
-5. And I found L1Cache Size will be a good choice as the concurrency unit,
+5. L1Cache Size will be the default concurrency unit,
    it improve performance greatly(especially the data shard's size is large)
 6. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
 instructions now
@@ -43,7 +43,7 @@ Performance depends mainly on:
 3. CPU instruction extension(support AVX2 or SSSE3)
 4. unit size of concurrence
 
-Example of performance scaling on MacBook Pro "Core i7" 2.6 15" 2.6 GHz Core i7 (I7-6700HQ) - 4 physical cores, 8 logical cores. The example uses 10 data shards with 4 parity shards.
+Example of performance scaling on Core i7-6700HQ 2.6GHz 4 physical cores, 8 logical cores. The example uses 10 data shards with 4 parity shards.
 
 | DataSize | MB/s   | 
 |---------|---------|
