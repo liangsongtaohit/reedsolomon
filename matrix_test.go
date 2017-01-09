@@ -1,18 +1,18 @@
 package reedsolomon
 
 import (
+	"math/rand"
 	"strconv"
 	"strings"
 	"testing"
-	"math/rand"
 )
 
 func TestMatrixInverse(t *testing.T) {
 	testCases := []struct {
-		matrixData [][]byte
+		matrixData     [][]byte
 		expectedResult string
-		shouldPass  bool
-		expectedErr error
+		shouldPass     bool
+		expectedErr    error
 	}{
 		// Test case validating inverse of the input Matrix.
 		{

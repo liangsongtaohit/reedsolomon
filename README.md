@@ -1,19 +1,20 @@
 # Reed-Solomon
 
-Reed-Solomon Erasure Coding engine in Go, with speeds exceeding 3GB/s per physics core implemented in pure Go.
+Reed-Solomon Erasure Coding engine in Go, with speeds exceeding more than 3GB/s per physics core implemented in pure Go.
 
  * Coding over in GF(2^8).
  * Primitive Polynomial: x^8 + x^4 + x^3 + x^2 + 1 (0x1d)
 
 It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolom), with some optimizations/changes:
 
-1. Refactoring code
+1. Only support AVX2. I think SSSE3 maybe out of date
 2. Use Cauchy matrix as generator matrix, we can use it directly.Vandermonde matrix need some operation for preserving the 
 property that any square subset of rows is invertible(and I think there is a way to optimize inverse matrix's performance, I need some time to make it)
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
-4. Use a "pipeline mode" for encoding concurrency
-5. L1Cache Size will be the default concurrency unit,
+4. Use a "pipeline mode" for encoding concurrency.
+And physic cores number will be the pipeline number
+5. 32768 bytes(it's the L1 data cache size of many kinds of CPU) will be the default concurrency unit,
    it improve performance greatly(especially the data shard's size is large)
 6. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
 instructions now

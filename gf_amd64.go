@@ -1,49 +1,47 @@
 package reedsolomon
 
 //go:noescape
-func gfMulSSSE3(low, high, in, out []byte)
-
-//go:noescape
-func gfMulXorSSSE3(low, high, in, out []byte)
-
-//go:noescape
 func gfMulXorAVX2(low, high, in, out []byte)
 
 //go:noescape
 func gfMulAVX2(low, high, in, out []byte)
 
-func gfVectMul(c byte, in, out []byte) {
+func gfMulRemain(coeff byte, input, output []byte, size int) {
 	var done int
-	if cpuID == 0  {
-		gfMulAVX2(mulTableLow[c][:], mulTableHigh[c][:], in, out)
-		done = (len(in) >> 5) << 5
-	} else if cpuID == 1 {
-		gfMulSSSE3(mulTableLow[c][:], mulTableHigh[c][:], in, out)
-		done = (len(in) >> 4) << 4
-	}
-	remain := len(in) - done
-	if remain > 0 {
-		mt := mulTable[c]
-		for i := done; i < len(in); i++ {
-			out[i] = mt[in[i]]
+	if size < 32 {
+		mt := mulTable[coeff]
+		for i := done; i < size; i++ {
+			output[i] = mt[input[i]]
+		}
+	} else {
+		gfMulAVX2(mulTableLow[coeff][:], mulTableHigh[coeff][:], input, output)
+		done = (size >> 5) << 5
+		remain := size - done
+		if remain > 0 {
+			mt := mulTable[coeff]
+			for i := done; i < size; i++ {
+				output[i] = mt[input[i]]
+			}
 		}
 	}
 }
 
-func gfVectMulXor(c byte, in, out []byte) {
+func gfMulRemainXor(coeff byte, input, output []byte, size int) {
 	var done int
-	if cpuID == 0 {
-		gfMulXorAVX2(mulTableLow[c][:], mulTableHigh[c][:], in, out)
-		done = (len(in) >> 5) << 5
-	} else if cpuID == 1 {
-		gfMulXorSSSE3(mulTableLow[c][:], mulTableHigh[c][:], in, out)
-		done = (len(in) >> 4) << 4
-	}
-	remain := len(in) - done
-	if remain > 0 {
-		mt := mulTable[c]
-		for i := done; i < len(in); i++ {
-			out[i] ^= mt[in[i]]
+	if size < 32 {
+		mt := mulTable[coeff]
+		for i := done; i < size; i++ {
+			output[i] ^= mt[input[i]]
+		}
+	} else {
+		gfMulXorAVX2(mulTableLow[coeff][:], mulTableHigh[coeff][:], input, output)
+		done = (size >> 5) << 5
+		remain := size - done
+		if remain > 0 {
+			mt := mulTable[coeff]
+			for i := done; i < size; i++ {
+				output[i] ^= mt[input[i]]
+			}
 		}
 	}
 }

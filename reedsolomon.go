@@ -17,12 +17,16 @@ type rs struct {
 
 var ErrTooFewShards = errors.New("reedsolomon: too few shards given for encoding")
 var ErrTooManyShards = errors.New("reedsolomon: too many shards given for encoding")
+var ErrNoAVX2 = errors.New("reedsolomon: has no avx2")
 
 // New : create a encoding matrix for encoding, reconstruction
 func New(d, p int) (*rs, error) {
 	err := checkShards(d, p)
 	if err != nil {
 		return nil, err
+	}
+	if !avx2() {
+		return nil, ErrNoAVX2
 	}
 	r := rs{
 		data:   d,
@@ -47,3 +51,6 @@ func checkShards(d, p int) error {
 	}
 	return nil
 }
+
+//go:noescape
+func avx2() bool
