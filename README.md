@@ -41,7 +41,7 @@ Reconst: calculate data or parity from present shards;
 Performance depends mainly on:
 1. number of parity shards
 2. number of cores of CPU
-3. CPU instruction extension(support AVX2 or SSSE3)
+3. CPU instruction extension(only support AVX2)
 4. unit size of concurrence
 
 Example of performance scaling on Core i7-6700HQ 2.6GHz 4 physical cores, 8 logical cores. The example uses 10 data shards with 4 parity shards.
