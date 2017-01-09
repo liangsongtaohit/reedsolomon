@@ -20,6 +20,7 @@ And physic cores number will be the pipeline number
 instructions now
 7. Drop inverse matrix cache, it’s a statistical fact that only 2-3% shards need to be repaired.
 So I don't think it will improve performance much
+8. ...
 
 # Installation
 To get the package use the standard:
