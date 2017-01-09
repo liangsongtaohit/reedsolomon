@@ -47,7 +47,6 @@ Example of performance scaling on MacBook Pro "Core i7" 2.6 15" 2.6 GHz Core i7 
 
 | DataSize | MB/s   | 
 |---------|---------|
-| 64KB    | 9724.94 | 
 | 128KB   | 18165.53|
 | 256KB   | 20071.62| 
 | 512KB   | 16042.91| 
