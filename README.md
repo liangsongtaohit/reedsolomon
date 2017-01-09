@@ -12,11 +12,12 @@ It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolom),
 property that any square subset of rows is invertible(and I think there is a way to optimize inverse matrix's performance, I need some time to make it)
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
-4. Use a "pipeline mode" for encoding concurrency. And I found L1Cache Size will be a good choice as the concurrency unit,
-it improve performance greatly
-5. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
+4. Use a "pipeline mode" for encoding concurrency
+5. And I found L1Cache Size will be a good choice as the concurrency unit,
+   it improve performance greatly(especially the data shard's size is large)
+6. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
 instructions now
-6. Drop inverse matrix cache, it’s a statistical fact that only 2-3% shards need to be repaired.
+7. Drop inverse matrix cache, it’s a statistical fact that only 2-3% shards need to be repaired.
 So I don't think it will improve performance much
 
 # Installation
