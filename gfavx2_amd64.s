@@ -101,3 +101,13 @@ loop:
 done:
 	VZEROUPPER
 	RET
+
+// func avx2() bool
+TEXT ·avx2(SB),NOSPLIT,$0
+	CMPB    runtime·support_avx2(SB), $1
+	JE      has
+    MOVB    $0, ret+0(FP)
+	RET
+has:
+	MOVB    $1, ret+0(FP)
+	RET
