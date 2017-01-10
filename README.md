@@ -21,7 +21,8 @@ instructions now
 7. Delete inverse matrix cache part, it’s a statistical fact that only 2-3% shards need to be repaired.
 So I don't think it will improve performance very much
 8. Only 500 lines of codes(test & table not include), it's tiny
-9. ...
+9. Instead of copying data, I use maps to save position of data. Reconstruction is almost as fast as encoding now
+10. ...
 
 # Installation
 To get the package use the standard:
