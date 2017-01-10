@@ -45,6 +45,7 @@ func (r *rs) Reconst(dp matrix, lost []int, repairParity bool) error {
 
 func reconstData(encodeMatrix, dp, output matrix, dataLost, parityLost []int, numData, size int) error {
 	decodeMatrix := newMatrix(numData, numData)
+	// TODO survived map not copy
 	survivedDP := newMatrix(numData, size)
 	numShards := len(encodeMatrix)
 	// fill with survived data
@@ -58,10 +59,10 @@ func reconstData(encodeMatrix, dp, output matrix, dataLost, parityLost []int, nu
 	k := numData
 	for _, dl := range dataLost {
 		for j := k; j < numShards; j++ {
+			k++
 			if survived(j, parityLost) {
 				decodeMatrix[dl] = encodeMatrix[j]
 				survivedDP[dl] = dp[j]
-				k++
 				break
 			}
 		}

@@ -13,12 +13,12 @@ property that any square subset of rows is invertible(and I think there is a way
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
 4. Use a "pipeline mode" for encoding concurrency.
-And physic cores number will be the pipeline number
+And physic cores number will be the pipeline number, I think it's unnecessary to use hyper-threading
 5. 32768 bytes(it's the L1 data cache size of many kinds of CPU) will be the default concurrency unit,
-   it improve performance greatly(especially the data shard's size is large)
+   it improve performance greatly(especially if the data shard's size is large)
 6. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
 instructions now
-7. Drop inverse matrix cache, it’s a statistical fact that only 2-3% shards need to be repaired.
+7. Drop inverse matrix cache, it’s a statistical fact that only 2-3% dp need to be repaired.
 So I don't think it will improve performance much
 8. ...
 
@@ -34,18 +34,18 @@ This section assumes you know the basics of Reed-Solomon encoding. A good start 
 
 There are only two public function in the package: Encode and Reconst
 
-Encode : calculate parity of data shards;
+Encode : calculate parity of data dp;
 
-Reconst: calculate data or parity from present shards;
+Reconst: calculate data or parity from present dp;
 
 # Performance
 Performance depends mainly on:
-1. number of parity shards
+1. number of parity dp
 2. number of cores of CPU
 3. CPU instruction extension(only support AVX2)
 4. unit size of concurrence
 
-Example of performance scaling on Core i7-6700HQ 2.6GHz 4 physical cores, 8 logical cores. The example uses 10 data shards with 4 parity shards.
+Example of performance on a Macbook(i7-6700H 2.6GHz 4 physical cores). The example uses 10 data dp with 4 parity dp.
 
 | DataSize | MB/s   | 
 |---------|---------|

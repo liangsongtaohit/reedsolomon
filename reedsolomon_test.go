@@ -76,49 +76,46 @@ func TestReconst(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	shards := make([][]byte, 13)
-	for s := range shards {
-		shards[s] = make([]byte, size)
-	}
+	dp := newMatrix(13, size)
 	rand.Seed(0)
-	for s := 0; s < 13; s++ {
-		fillRandom(shards[s])
+	for s := 0; s < 10; s++ {
+		fillRandom(dp[s])
 	}
-	err = r.Encode(shards)
+	err = r.Encode(dp)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// restore encode result
 	store := newMatrix(3, size)
-	store[0] = shards[0]
-	store[1] = shards[4]
-	store[2] = shards[12]
-	// Reconstruct with all shards present
+	store[0] = dp[0]
+	store[1] = dp[4]
+	store[2] = dp[12]
+	// Reconstruct with all dp present
 	var lost []int
-	err = r.Reconst(shards, lost, true)
+	err = r.Reconst(dp, lost, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	// 3 shards "missing"
+	// 3 dp "missing"
 	lost = append(lost, 4)
 	lost = append(lost, 0)
 	lost = append(lost, 12)
-	err = r.Reconst(shards, lost, true)
+	err = r.Reconst(dp, lost, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(store[0], shards[0]) {
-		t.Fatal("reconst data mismatch: shards[0]")
+	if !bytes.Equal(store[0], dp[0]) {
+		t.Fatal("reconst data mismatch: dp[0]")
 	}
-	if !bytes.Equal(store[1], shards[4]) {
-		t.Fatal("reconst data mismatch: shards[4]")
+	if !bytes.Equal(store[1], dp[4]) {
+		t.Fatal("reconst data mismatch: dp[4]")
 	}
-	if !bytes.Equal(store[2], shards[12]) {
-		t.Fatal("reconst data mismatch: shards[12]")
+	if !bytes.Equal(store[2], dp[12]) {
+		t.Fatal("reconst data mismatch: dp[12]")
 	}
-	// Reconstruct with 9 shards present (should fail)
+	// Reconstruct with 9 dp present (should fail)
 	lost = append(lost, 11)
-	err = r.Reconst(shards, lost, true)
+	err = r.Reconst(dp, lost, true)
 	if err != ErrTooFewShards {
 		t.Errorf("expected %v, got %v", ErrTooFewShards, err)
 	}
@@ -170,69 +167,32 @@ func BenchmarkEncode10x4x64K(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 64*1024)
 }
 
-// Benchmark 10 data shards and 4 parity shards with 128KB each.
 func BenchmarkEncode10x4x128K(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 128*1024)
 }
 
-// Benchmark 10 data shards and 4 parity shards with 256KB each.
 func BenchmarkEncode10x4x256K(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 256*1024)
 }
 
-// Benchmark 10 data shards and 4 parity shards with 512KB each.
 func BenchmarkEncode10x4x512K(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 512*1024)
 }
 
-// Benchmark 10 data shards and 4 parity shards with 1MB each.
 func BenchmarkEncode10x4x1M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 1024*1024)
 }
 
-// Benchmark 10 data shards and 4 parity shards with 16MB each.
 func BenchmarkEncode10x4x16M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 16*1024*1024)
 }
 
-// Benchmark 28 data shards and 4 parity shards with 64KB each.
-func BenchmarkEncode28x4x64K(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 64*1024)
-}
-
-// Benchmark 28 data shards and 4 parity shards with 128KB each.
-func BenchmarkEncode28x4x128K(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 128*1024)
-}
-
-// Benchmark 28 data shards and 4 parity shards with 256KB each.
-func BenchmarkEncode28x4x256K(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 256*1024)
-}
-
-// Benchmark 28 data shards and 4 parity shards with 512KB each.
-func BenchmarkEncode28x4x512K(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 512*1024)
-}
-
-// Benchmark 28 data shards and 4 parity shards with 1MB each.
 func BenchmarkEncode28x4x1M(b *testing.B) {
 	benchmarkEncode(b, 28, 4, 1024*1024)
 }
 
-// Benchmark 28 data shards and 4 parity shards with 16MB each.
 func BenchmarkEncode28x4x16M(b *testing.B) {
 	benchmarkEncode(b, 28, 4, 16*1024*1024)
-}
-
-// Benchmark 14 data shards and 10 parity shards with 1MB each.
-func BenchmarkEncode14x10x1M(b *testing.B) {
-	benchmarkEncode(b, 14, 10, 1024*1024)
-}
-
-// Benchmark 14 data shards and 10 parity shards with 16MB each.
-func BenchmarkEncode14x10x16M(b *testing.B) {
-	benchmarkEncode(b, 14, 10, 16*1024*1024)
 }
 
 func benchmarkEncode(b *testing.B, data, parity, size int) {
@@ -249,6 +209,73 @@ func benchmarkEncode(b *testing.B, data, parity, size int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		err = r.Encode(dp)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkMemCopy10x64K(b *testing.B) {
+	benchmarkCopy(b, 10*64*1024)
+}
+
+func benchmarkCopy(b *testing.B, size int) {
+	src := make([]byte, size)
+	fillRandom(src)
+	dst := make([]byte, size)
+	b.SetBytes(int64(size))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		copy(dst, src)
+	}
+}
+
+func BenchmarkEncode10x1x256K(b *testing.B) {
+	benchmarkEncode(b, 10, 1, 256*1024)
+}
+
+func BenchmarkEncode10x1x512K(b *testing.B) {
+	benchmarkEncode(b, 10, 1, 512*1024)
+}
+
+func BenchmarkEncode10x1x1M(b *testing.B) {
+	benchmarkEncode(b, 10, 1, 1024*1024)
+}
+
+func BenchmarkReconst10x4x1M(b *testing.B) {
+	benchmarkReconst(b, 10, 4, 1024*1024)
+}
+
+func BenchmarkReconst10x4x16M(b *testing.B) {
+	benchmarkReconst(b, 10, 4, 16*1024*1024)
+}
+
+func benchmarkReconst(b *testing.B, d, p, size int) {
+	r, err := New(d, p)
+	if err != nil {
+		b.Fatal(err)
+	}
+	dp := newMatrix(d+p, size)
+	rand.Seed(0)
+	for s := 0; s < d; s++ {
+		fillRandom(dp[s])
+	}
+	err = r.Encode(dp)
+	if err != nil {
+		b.Fatal(err)
+	}
+	var lost []int
+	shardsToCorrupt := rand.Intn(p)
+	for i := 1; i <= shardsToCorrupt; i++ {
+		lost = append(lost, rand.Intn(d+p))
+	}
+	for _, l := range lost {
+		dp[l] = make([]byte, size)
+	}
+	b.SetBytes(int64(size * d))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err = r.Reconst(dp, lost, true)
 		if err != nil {
 			b.Fatal(err)
 		}
