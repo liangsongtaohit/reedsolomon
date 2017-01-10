@@ -32,7 +32,7 @@ go get github.com/templexxx/reedsolomon
 
 # Usage
 
-This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/) or [my articles](http://templex.xyz) (more info about this package there).
+This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/) or [my blogs](http://templex.xyz) (more info about this package there).
 
 There are only two public function in the package: Encode and Reconst
 
