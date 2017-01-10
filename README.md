@@ -5,7 +5,7 @@ Reed-Solomon Erasure Coding engine in Go, with speeds exceeding more than 3GB/s 
  * Coding over in GF(2^8).
  * Primitive Polynomial: x^8 + x^4 + x^3 + x^2 + 1 (0x1d)
 
-It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolom), with some optimizations/changes:
+It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolomon), with some optimizations/changes:
 
 1. Only support AVX2. I think SSSE3 maybe out of date
 2. Use Cauchy matrix as generator matrix, we can use it directly.Vandermonde matrix need some operation for preserving the 
@@ -45,7 +45,7 @@ Performance depends mainly on:
 3. CPU instruction extension(only support AVX2)
 4. unit size of concurrence
 
-Example of performance on a Macbook(i7-6700H 2.6GHz 4 physical cores). The example uses 10 data dp with 4 parity dp.
+Example of performance on a MacBook(i7-6700H 2.6GHz 4 physical cores). The example uses 10 data dp with 4 parity dp.
 
 | DataSize | MB/s   | 
 |---------|---------|
@@ -58,7 +58,3 @@ Example of performance on a Macbook(i7-6700H 2.6GHz 4 physical cores). The examp
 # Links
 * [Klauspost ReedSolomon](https://github.com/klauspost/reedsolom)
 * [intel ISA-L](https://github.com/01org/isa-l)
-
-# License
-
-This code, as the original [Klauspost ReedSolomon](https://github.com/klauspost/reedsolomon) is published under an MIT license. See LICENSE file for more information.
