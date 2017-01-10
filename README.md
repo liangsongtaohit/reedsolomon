@@ -42,6 +42,7 @@ Reconst: calculate data or parity from present shards;
 
 # Performance
 Performance depends mainly on:
+
 1. number of parity shards
 2. number of cores of CPU（linear dependence, n-core cpu performance = one * n）
 3. CPU instruction extension(only support AVX2)
