@@ -16,19 +16,25 @@ func (r *rs) Encode(dp matrix) error {
 	if err != nil {
 		return err
 	}
-	input := dp[0:r.data]
-	output := dp[r.data:]
-	encodeRunner(r.gen, input, output, r.data, r.parity, size)
+	inMap := make(map[int]int)
+	outMap := make(map[int]int)
+	for i := 0; i < r.data; i++ {
+		inMap[i] = i
+	}
+	for i := r.data; i < r.shards; i++ {
+		outMap[i-r.data] = i
+	}
+	encodeRunner(r.gen, dp, r.data, r.parity, size, inMap, outMap)
 	return nil
 }
 
-func encodeRunner(gen, input, output matrix, numIn, numOut, size int) {
-	pipeline := runtime.GOMAXPROCS(0) / 2
+func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int]int) {
+	pipeline := runtime.GOMAXPROCS(0)
 	offsets := make(chan [2]int, pipeline)
 	wg := &sync.WaitGroup{}
 	wg.Add(pipeline)
 	for i := 0; i < pipeline; i++ {
-		go encodeWorker(offsets, wg, gen, input, output, numIn, numOut)
+		go encodeWorker(offsets, wg, gen, dp, numIn, numOut, inMap, outMap)
 	}
 	start := 0
 	unitSize := 32768   // concurrency unit size
@@ -39,7 +45,7 @@ func encodeRunner(gen, input, output matrix, numIn, numOut, size int) {
 			offsets <- offset
 			start = start + do
 		} else {
-			encodeRemain(start, size, gen, input, output, numIn, numOut)
+			encodeRemain(start, size, gen, dp, numIn, numOut, inMap, outMap)
 			start = size
 		}
 	}
@@ -47,35 +53,39 @@ func encodeRunner(gen, input, output matrix, numIn, numOut, size int) {
 	wg.Wait()
 }
 
-func encodeRemain(start, size int, gen, input, output matrix, numIn, numOut int) {
+func encodeRemain(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
 	do := size - start
 	for i := 0; i < numIn; i++ {
-		in := input[i]
+		j := inMap[i]
+		in := dp[j]
 		for oi := 0; oi < numOut; oi++ {
+			k := outMap[oi]
 			c := gen[oi][i]
 			if i == 0 {
-				gfMulRemain(c, in[start:size], output[oi][start:size], do)
+				gfMulRemain(c, in[start:size], dp[k][start:size], do)
 			} else {
-				gfMulRemainXor(c, in[start:size], output[oi][start:size], do)
+				gfMulRemainXor(c, in[start:size], dp[k][start:size], do)
 			}
 		}
 	}
 }
 
-func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, input, output matrix, numIn, numOut int) {
+func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
 	defer wg.Done()
 	for offset := range offsets {
 		start := offset[0]
 		do := offset[1]
 		end := start + do
 		for i := 0; i < numIn; i++ {
-			in := input[i]
+			j := inMap[i]
+			in := dp[j]
 			for oi := 0; oi < numOut; oi++ {
+				k := outMap[oi]
 				c := gen[oi][i]
 				if i == 0 {
-					gfMulAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], output[oi][start:end])
+					gfMulAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
 				} else {
-					gfMulXorAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], output[oi][start:end])
+					gfMulXorAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
 				}
 			}
 		}

@@ -149,33 +149,8 @@ func TestASM(t *testing.T) {
 	}
 }
 
-// Benchmark 10 data shards and 4 parity shards with 64KB each.
-func BenchmarkEncode10x4x64K(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 64*1024)
-}
-
-func BenchmarkEncode10x4x128K(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 128*1024)
-}
-
-func BenchmarkEncode10x4x256K(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 256*1024)
-}
-
-func BenchmarkEncode10x4x512K(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 512*1024)
-}
-
-func BenchmarkEncode10x4x1M(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 1024*1024)
-}
-
 func BenchmarkEncode10x4x16M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 16*1024*1024)
-}
-
-func BenchmarkEncode28x4x1M(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 1024*1024)
 }
 
 func BenchmarkEncode28x4x16M(b *testing.B) {
@@ -202,23 +177,39 @@ func benchmarkEncode(b *testing.B, data, parity, size int) {
 	}
 }
 
-func BenchmarkEncode10x1x1M(b *testing.B) {
-	benchmarkEncode(b, 10, 1, 1024*1024)
+func BenchmarkReconst10x4x16mRepair1(b *testing.B) {
+	benchmarkReconst(b, 10, 4, 16*1024*1024, 1)
 }
 
-func BenchmarkReconst10x4x1M(b *testing.B) {
-	benchmarkReconst(b, 10, 4, 1024*1024)
+func BenchmarkReconst10x4x16mRepair2(b *testing.B) {
+	benchmarkReconst(b, 10, 4, 16*1024*1024, 2)
 }
 
-func BenchmarkEncode10x1x16M(b *testing.B) {
-	benchmarkEncode(b, 10, 16, 1024*1024)
+func BenchmarkReconst10x4x16mRepair3(b *testing.B) {
+	benchmarkReconst(b, 10, 4, 16*1024*1024, 3)
 }
 
-func BenchmarkReconst10x4x16M(b *testing.B) {
-	benchmarkReconst(b, 10, 4, 16*1024*1024)
+func BenchmarkReconst10x4x16mRepair4(b *testing.B) {
+	benchmarkReconst(b, 10, 4, 16*1024*1024, 4)
 }
 
-func benchmarkReconst(b *testing.B, d, p, size int) {
+func BenchmarkReconst28x4x16mRepair1(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16*1024*1024, 1)
+}
+
+func BenchmarkReconst28x4x16mRepair2(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16*1024*1024, 2)
+}
+
+func BenchmarkReconst28x4x16mRepair3(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16*1024*1024, 3)
+}
+
+func BenchmarkReconst28x4x16mRepair4(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16*1024*1024, 4)
+}
+
+func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	r, err := New(d, p)
 	if err != nil {
 		b.Fatal(err)
@@ -233,8 +224,7 @@ func benchmarkReconst(b *testing.B, d, p, size int) {
 		b.Fatal(err)
 	}
 	var lost []int
-	shardsToCorrupt := rand.Intn(p)
-	for i := 1; i <= shardsToCorrupt; i++ {
+	for i := 1; i <= repair; i++ {
 		lost = append(lost, rand.Intn(d+p))
 	}
 	for _, l := range lost {

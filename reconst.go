@@ -1,8 +1,6 @@
 package reedsolomon
 
-import (
-	"sort"
-)
+import "sort"
 
 // dp : data+parity shards, all shards size must be equal
 // lost : row number in dp
@@ -23,36 +21,28 @@ func (r *rs) Reconst(dp matrix, lost []int, repairParity bool) error {
 	dataLost, parityLost := splitLost(lost, r.data, r.parity)
 	sort.Ints(dataLost)
 	sort.Ints(parityLost)
-	dataRepaired := newMatrix(len(dataLost), size)
 	if len(dataLost) > 0 {
-		err = reconstData(r.m, dp, dataRepaired, dataLost, parityLost, r.data, size)
+		err = reconstData(r.m, dp, dataLost, parityLost, r.data, size)
 		if err != nil {
 			return err
 		}
 	}
-	for i, l := range dataLost {
-		dp[l] = dataRepaired[i]
-	}
-	parityRepaired := newMatrix(len(parityLost), size)
 	if len(parityLost) > 0 && repairParity {
-		reconstParity(r.m, dp, parityRepaired, parityLost, r.data, size)
-	}
-	for i, l := range parityLost {
-		dp[l] = parityRepaired[i]
+		reconstParity(r.m, dp, parityLost, r.data, size)
 	}
 	return nil
 }
 
-func reconstData(encodeMatrix, dp, output matrix, dataLost, parityLost []int, numData, size int) error {
+func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, size int) error {
 	decodeMatrix := newMatrix(numData, numData)
 	// TODO use survived map but not copy data
-	survivedDP := newMatrix(numData, size)
+	survivedMap := make(map[int]int)
 	numShards := len(encodeMatrix)
 	// fill with survived data
 	for i := 0; i < numData; i++ {
 		if survived(i, dataLost) {
 			decodeMatrix[i] = encodeMatrix[i]
-			survivedDP[i] = dp[i]
+			survivedMap[i] = i
 		}
 	}
 	// "borrow" from survived parity
@@ -62,7 +52,7 @@ func reconstData(encodeMatrix, dp, output matrix, dataLost, parityLost []int, nu
 			k++
 			if survived(j, parityLost) {
 				decodeMatrix[dl] = encodeMatrix[j]
-				survivedDP[dl] = dp[j]
+				survivedMap[dl] = j
 				break
 			}
 		}
@@ -75,20 +65,28 @@ func reconstData(encodeMatrix, dp, output matrix, dataLost, parityLost []int, nu
 	// fill generator matrix with lost rows of decode matrix
 	numDL := len(dataLost)
 	gen := newMatrix(numDL, numData)
+	outputMap := make(map[int]int)
 	for i, l := range dataLost {
 		gen[i] = decodeMatrix[l]
+		outputMap[i] = l
 	}
-	encodeRunner(gen, survivedDP, output, numData, numDL, size)
+	encodeRunner(gen, dp, numData, numDL, size, survivedMap, outputMap)
 	return nil
 }
 
-func reconstParity(encodeMatrix, dp, output matrix, parityLost []int, numData, size int) {
+func reconstParity(encodeMatrix, dp matrix, parityLost []int, numData, size int) {
 	subGen := newMatrix(len(parityLost), numData)
+	outputMap := make(map[int]int)
 	for i := range subGen {
 		l := parityLost[i]
 		subGen[i] = encodeMatrix[l]
+		outputMap[i] = l
 	}
-	encodeRunner(subGen, dp[:numData], output, numData, len(parityLost), size)
+	inMap := make(map[int]int)
+	for i := 0; i < numData; i++ {
+		inMap[i] = i
+	}
+	encodeRunner(subGen, dp, numData, len(parityLost), size, inMap, outputMap)
 }
 
 func splitLost(lost []int, d, p int) ([]int, []int) {
