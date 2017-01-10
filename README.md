@@ -44,6 +44,7 @@ Performance depends mainly on:
 2. number of cores of CPU
 3. CPU instruction extension(only support AVX2)
 4. unit size of concurrence
+5. size of shards
 
 Example of performance on a MacBook(i7-6700H 2.6GHz 4 physical cores). The example uses 10 data dp with 4 parity dp.
 
