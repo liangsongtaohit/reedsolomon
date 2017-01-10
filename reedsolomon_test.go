@@ -12,22 +12,16 @@ func TestEncode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dp := make([][]byte, 13)
-	for s := range dp {
-		dp[s] = make([]byte, size)
-	}
-
+	dp := newMatrix(13, size)
 	rand.Seed(0)
 	for s := 0; s < 13; s++ {
 		fillRandom(dp[s])
 	}
-
 	err = r.Encode(dp)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	badDP := make([][]byte, 13)
+	badDP := newMatrix(13, 100)
 	badDP[0] = make([]byte, 1)
 	err = r.Encode(badDP)
 	if err != ErrShardSize {
@@ -122,41 +116,34 @@ func TestReconst(t *testing.T) {
 }
 
 func TestASM(t *testing.T) {
-	NumData := 10
-	NumParity := 4
-	shardSize := 9999
-	r, err := New(NumData, NumParity)
+	d := 10
+	p := 4
+	size := 9999
+	r, err := New(d, p)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// asm
-	shards := make([][]byte, NumData+NumParity)
-	for i := range shards {
-		shards[i] = make([]byte, shardSize)
-	}
-
+	dp := newMatrix(d+p, size)
 	rand.Seed(0)
-	for i := 0; i < NumData; i++ {
-		fillRandom(shards[i])
+	for i := 0; i < d; i++ {
+		fillRandom(dp[i])
 	}
-	err = r.Encode(shards)
+	err = r.Encode(dp)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// mulTable
-	mshards := make([][]byte, NumData+NumParity)
-	for i := range mshards {
-		mshards[i] = make([]byte, shardSize)
+	mDP := newMatrix(d+p, size)
+	for i := 0; i < d; i++ {
+		mDP[i] = dp[i]
 	}
-	for i := 0; i < NumData; i++ {
-		mshards[i] = shards[i]
-	}
-	err = r.noasmEncode(mshards)
+	err = r.noasmEncode(mDP)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i, asmR := range shards {
-		if !bytes.Equal(asmR, mshards[i]) {
+	for i, asm := range dp {
+		if !bytes.Equal(asm, mDP[i]) {
 			t.Fatal("verify asm failed, no match noasm version")
 		}
 	}
@@ -215,35 +202,16 @@ func benchmarkEncode(b *testing.B, data, parity, size int) {
 	}
 }
 
-func BenchmarkMemCopy10x64K(b *testing.B) {
-	benchmarkCopy(b, 10*64*1024)
-}
-
-func benchmarkCopy(b *testing.B, size int) {
-	src := make([]byte, size)
-	fillRandom(src)
-	dst := make([]byte, size)
-	b.SetBytes(int64(size))
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		copy(dst, src)
-	}
-}
-
-func BenchmarkEncode10x1x256K(b *testing.B) {
-	benchmarkEncode(b, 10, 1, 256*1024)
-}
-
-func BenchmarkEncode10x1x512K(b *testing.B) {
-	benchmarkEncode(b, 10, 1, 512*1024)
-}
-
 func BenchmarkEncode10x1x1M(b *testing.B) {
 	benchmarkEncode(b, 10, 1, 1024*1024)
 }
 
 func BenchmarkReconst10x4x1M(b *testing.B) {
 	benchmarkReconst(b, 10, 4, 1024*1024)
+}
+
+func BenchmarkEncode10x1x16M(b *testing.B) {
+	benchmarkEncode(b, 10, 16, 1024*1024)
 }
 
 func BenchmarkReconst10x4x16M(b *testing.B) {
@@ -301,7 +269,6 @@ func (r *rs) noasmEncode(dp matrix) error {
 	if err != nil {
 		return err
 	}
-
 	// encoding
 	input := dp[0:r.data]
 	output := dp[r.data:]

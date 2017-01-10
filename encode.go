@@ -6,8 +6,6 @@ import (
 	"sync"
 )
 
-const unitSize = 32768 // concurrency unit size
-
 // Encode : cauchy_matrix * data_matrix(input) -> parity_matrix(output)
 // dp : data_matrix(upper) parity_matrix(lower, empty now)
 func (r *rs) Encode(dp matrix) error {
@@ -33,6 +31,7 @@ func encodeRunner(gen, input, output matrix, numIn, numOut, size int) {
 		go encodeWorker(offsets, wg, gen, input, output, numIn, numOut)
 	}
 	start := 0
+	unitSize := 32768   // concurrency unit size
 	do := unitSize
 	for start < size {
 		if start+do <= size {
@@ -86,7 +85,6 @@ func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, input, output ma
 var ErrShardSize = errors.New("reedsolomon: shards size equal 0 or not match")
 
 func checkShardSize(m matrix) (int, error) {
-
 	size := len(m[0])
 	if size == 0 {
 		return size, ErrShardSize

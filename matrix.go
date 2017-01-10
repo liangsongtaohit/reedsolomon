@@ -137,8 +137,6 @@ func (m matrix) subMatrix(size int) matrix {
 	return result
 }
 
-var ErrInvalidRowSize = errors.New("reedsolomon: invalid row size")
-
 // SwapRows Exchanges two rows in the matrix.
 func (m matrix) swapRows(r1, r2 int) {
 	m[r2], m[r1] = m[r1], m[r2]
