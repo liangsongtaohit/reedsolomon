@@ -12,8 +12,8 @@ It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolomon
 property that any square subset of rows is invertible(and I think there is a way to optimize inverse matrix's performance, I need some time to make it)
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
-4. Use a "pipeline mode" for encoding concurrency.
-And logic cores number will be the pipeline number, anyway I don't think it's necessary to use hyper-threading
+4. Use a "pipeline mode" for encoding concurrency,
+and logic cores number will be the pipeline number(TODO: I will change it to physics cores number)
 5. 32768 bytes(it's the L1 data cache size of many kinds of CPU) will be the default concurrency unit,
    it improve performance greatly(especially if the data shard's size is large)
 6. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
@@ -48,6 +48,7 @@ Performance depends mainly on:
 3. CPU instruction extension(only support AVX2)
 4. unit size of concurrence
 5. size of shards
+6. speed of memory(waste so much time on read/write mem, :D )
 
 Example of performance on my MacBook 2014-mid(i5-4278U 2.6GHz 2 physical cores). The example uses 10 data with 4 parity 16MB per shards.
 
