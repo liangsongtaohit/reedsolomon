@@ -13,16 +13,20 @@ property that any square subset of rows is invertible(and I think there is a way
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
 4. Use a "pipeline mode" for encoding concurrency,
-and logic cores number will be the pipeline number(TODO: I will change it to physics cores number)
-5. 32768 bytes(it's the L1 data cache size of many kinds of CPU) will be the default concurrency unit,
-   it improve performance greatly(especially if the data shard's size is large)
+and physics cores number will be the pipeline number(it saves power, :D )
+5. 32768 bytes(it's the L1 data cache size of many kinds of CPU,small unit is more cache-friendly) will be the default concurrency unit,
+   it improve performance greatly(especially if the data shard's size is large).
 6. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
-instructions now
+instructions now (unfortunately, I added some new byte codes)
 7. Delete inverse matrix cache part, it’s a statistical fact that only 2-3% shards need to be repaired.
 So I don't think it will improve performance very much
 8. Only 500 lines of codes(test & table not include), it's tiny
 9. Instead of copying data, I use maps to save position of data. Reconstruction is almost as fast as encoding now
-10. ...
+10. AVX intrinsic instructions are not mixed with any of SSE instructions, so we don't need "VZEROUPPER" to avoid AVX-SSE Transition Penalties,
+it seems improve performance.
+11. Some of Golang's asm OP codes make me uncomfortable, especially the "MOVQ", so I use byte codes to operate the register lower part sometimes.
+I still need time to learn the golang asm more.
+12. ...
 
 # Installation
 To get the package use the standard:
@@ -50,9 +54,20 @@ Performance depends mainly on:
 5. size of shards
 6. speed of memory(waste so much time on read/write mem, :D )
 
-Example of performance on my MacBook 2014-mid(i5-4278U 2.6GHz 2 physical cores). The example uses 10 data with 4 parity 16MB per shards.
+Example of performance on my MacBook 2014-mid(i5-4278U 2.6GHz 2 physical cores). The 16MB per shards.
 
-![alt tag](http://templex.xyz/images/reedsolomon/mybench.jpg)
+| Encode/Reconst | data+Parity/data+Lost    | Speed (MB/S) | MacBook (i7-6700HQ)|
+|----------------|--------------------------|--------------|--------------------|
+|      E         | 10+4       |6629.72  | 14379.51 MB/S|
+| E              | 28+4       | 7524.88  | 15542.39 MB/S|
+| R              | 10+1       | 15198.09 |
+| R              | 10+2       | 10993.94  |
+| R              | 10+3       | 8559.67  |
+| R              | 10+4      | 5283.62  |
+| R              | 28+1 | 16735.21  |
+| R              | 28+2 | 12581.73  |
+| R              | 28+3 | 9783.60  |
+| R              | 28+4 | 7788.79  |
 
 # Links
 * [Klauspost ReedSolomon](https://github.com/klauspost/reedsolom)

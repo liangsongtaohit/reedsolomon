@@ -84,6 +84,9 @@ func TestReconst(t *testing.T) {
 	store[0] = dp[0]
 	store[1] = dp[4]
 	store[2] = dp[12]
+	dp[0] = make([]byte, size)
+	dp[4] = make([]byte, size)
+	dp[12] = make([]byte, size)
 	// Reconstruct with all dp present
 	var lost []int
 	err = r.Reconst(dp, lost, true)
@@ -144,7 +147,7 @@ func TestASM(t *testing.T) {
 	}
 	for i, asm := range dp {
 		if !bytes.Equal(asm, mDP[i]) {
-			t.Fatal("verify asm failed, no match noasm version")
+			t.Fatal("verify asm failed, no match noasm version; shards: ", i)
 		}
 	}
 }

@@ -10,7 +10,7 @@ import (
 )
 
 // set deg here
-const deg = 8   // <= 8
+const deg = 8 // <= 8
 
 type polynomial [deg + 1]uint8
 

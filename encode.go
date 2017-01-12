@@ -2,8 +2,9 @@ package reedsolomon
 
 import (
 	"errors"
-	"runtime"
 	"sync"
+
+	"github.com/klauspost/cpuid"
 )
 
 // Encode : cauchy_matrix * data_matrix(input) -> parity_matrix(output)
@@ -29,7 +30,7 @@ func (r *rs) Encode(dp matrix) error {
 }
 
 func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int]int) {
-	pipeline := runtime.GOMAXPROCS(0)
+	pipeline := cpuid.CPU.PhysicalCores
 	offsets := make(chan [2]int, pipeline)
 	wg := &sync.WaitGroup{}
 	wg.Add(pipeline)
@@ -37,7 +38,7 @@ func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int
 		go encodeWorker(offsets, wg, gen, dp, numIn, numOut, inMap, outMap)
 	}
 	start := 0
-	unitSize := 32768   // concurrency unit size
+	unitSize := 32768 // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size)
 	do := unitSize
 	for start < size {
 		if start+do <= size {
@@ -53,23 +54,6 @@ func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int
 	wg.Wait()
 }
 
-func encodeRemain(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
-	do := size - start
-	for i := 0; i < numIn; i++ {
-		j := inMap[i]
-		in := dp[j]
-		for oi := 0; oi < numOut; oi++ {
-			k := outMap[oi]
-			c := gen[oi][i]
-			if i == 0 {
-				gfMulRemain(c, in[start:size], dp[k][start:size], do)
-			} else {
-				gfMulRemainXor(c, in[start:size], dp[k][start:size], do)
-			}
-		}
-	}
-}
-
 func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
 	defer wg.Done()
 	for offset := range offsets {
@@ -82,11 +66,28 @@ func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, dp matrix, numIn
 			for oi := 0; oi < numOut; oi++ {
 				k := outMap[oi]
 				c := gen[oi][i]
-				if i == 0 {
+				if i == 0 { // it means don't need to copy data from data for xor
 					gfMulAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
 				} else {
 					gfMulXorAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
 				}
+			}
+		}
+	}
+}
+
+func encodeRemain(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
+	do := size - start
+	for i := 0; i < numIn; i++ {
+		j := inMap[i]
+		in := dp[j]
+		for oi := 0; oi < numOut; oi++ {
+			k := outMap[oi]
+			c := gen[oi][i]
+			if i == 0 {
+				gfMulRemain(c, in[start:size], dp[k][start:size], do)
+			} else {
+				gfMulRemainXor(c, in[start:size], dp[k][start:size], do)
 			}
 		}
 	}
