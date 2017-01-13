@@ -1,5 +1,3 @@
-// Copyright 2016, TempleX, see LICENSE for details.
-
 // Reference: www.ssrc.ucsc.edu/Papers/plank-fast13.pdf
 
 #include "textflag.h"
@@ -7,7 +5,7 @@
 // func gfMulAVX2(low, high, in, out []byte)
 TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 	// table -> ymm
-	MOVQ    lowTable+0(FP), AX  // it's not intel OP code MOVQ, it's more like MOV
+    MOVQ    lowTable+0(FP), AX  // it's not intel OP code MOVQ, it's more like MOV
 	MOVQ    highTable+24(FP), BX
 	VMOVDQU (AX), X0    // 128-bit Intel® AVX instructions operate on the lower 128 bits of the YMM registers and zero the upper 128 bits
 	VMOVDQU (BX), X1
