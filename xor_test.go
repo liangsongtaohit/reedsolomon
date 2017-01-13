@@ -40,12 +40,20 @@ func BenchmarkXor10x16M(b *testing.B) {
 	benchmarkXor(b, 10,16*1024*1024)
 }
 
+func BenchmarkNoAVX2Xor10x16M(b *testing.B) {
+	benchmarkNOAVX2Xor(b, 10,  16*1024*1024)
+}
+
 func BenchmarkEncode28x1x16M(b *testing.B) {
 	benchmarkEncode(b, 28, 1, 16*1024*1024)
 }
 
 func BenchmarkXor28x16M(b *testing.B) {
 	benchmarkXor(b, 28,  16*1024*1024)
+}
+
+func BenchmarkNoAVX2Xor28x16M(b *testing.B) {
+	benchmarkNOAVX2Xor(b, 28,  16*1024*1024)
 }
 
 func benchmarkXor(b *testing.B, data, size int) {
@@ -61,6 +69,19 @@ func benchmarkXor(b *testing.B, data, size int) {
 		if err != nil {
 			b.Fatal(err)
 		}
+	}
+}
+
+func benchmarkNOAVX2Xor(b *testing.B, data, size int) {
+	dp := newMatrix(data+1, size)
+	rand.Seed(0)
+	for i := 0; i < data; i++ {
+		fillRandom(dp[i])
+	}
+	b.SetBytes(int64(size * data))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		noasmXor(dp)
 	}
 }
 
