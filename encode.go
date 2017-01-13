@@ -38,7 +38,7 @@ func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int
 		go encodeWorker(offsets, wg, gen, dp, numIn, numOut, inMap, outMap)
 	}
 	start := 0
-	unitSize := 32768 // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size)
+	unitSize := 32 * 1024 // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size)
 	do := unitSize
 	for start < size {
 		if start+do <= size {

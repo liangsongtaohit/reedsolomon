@@ -13,9 +13,9 @@ property that any square subset of rows is invertible(and I think there is a way
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
 4. Use a "pipeline mode" for encoding concurrency,
-and physics cores number will be the pipeline number(it saves power, :D )
+and physics cores number will be the pipeline number(it's as fast as more goroutines, even faster.And it saves power too :D )
 5. 32768 bytes(it's the L1 data cache size of many kinds of CPU,small unit is more cache-friendly) will be the default concurrency unit,
-   it improve performance greatly(especially if the data shard's size is large).
+   it improve performance greatly(especially when the data shard's size is large).
 6. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
 instructions now (unfortunately, I added some new byte codes)
 7. Delete inverse matrix cache part, it’s a statistical fact that only 2-3% shards need to be repaired.
@@ -25,7 +25,7 @@ So I don't think it will improve performance very much
 10. AVX intrinsic instructions are not mixed with any of SSE instructions, so we don't need "VZEROUPPER" to avoid AVX-SSE Transition Penalties,
 it seems improve performance.
 11. Some of Golang's asm OP codes make me uncomfortable, especially the "MOVQ", so I use byte codes to operate the register lower part sometimes.
-I still need time to learn the golang asm more.
+I still need time to learn the golang asm more. (Thanks to [asm2plan9s](https://github.com/fwessels/asm2plan9s))
 12. ...
 
 # Installation

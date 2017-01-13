@@ -17,9 +17,9 @@ TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 	MOVQ        out+72(FP), BX // out_add -> BX
 
 	// mask -> ymm
-	BYTE         $0xb1; BYTE $0x0f                                                 // MOV $0x0f, CL
-	BYTE         $0xc4; BYTE $0xe3; BYTE $0x69; BYTE $0x20; BYTE $0xd1; BYTE $0x00 // VPINSRB $0x00, ECX, XMM2, XMM2
-	VPBROADCASTB X2, Y2                                                            // [1111,1111,1111...1111]
+	WORD $0xb341; BYTE $0x0f        // MOV $0x0f, R11B
+	LONG $0x2069c3c4; WORD $0x00d3 // VPINSRB $0x00, R11D, XMM2, XMM2
+	VPBROADCASTB X2, Y2            // [1111,1111,1111...1111]
 
 	// if done
 	MOVQ  in_len+56(FP), CX // in_len -> CX
@@ -63,8 +63,8 @@ TEXT ·gfMulXorAVX2(SB), NOSPLIT, $0
 	VINSERTI128  $1, X1, Y1, Y1
 	MOVQ         in+48(FP), AX
 	MOVQ         out+72(FP), BX
-	BYTE         $0xb1; BYTE $0x0f
-	BYTE         $0xc4; BYTE $0xe3; BYTE $0x69; BYTE $0x20; BYTE $0xd1; BYTE $0x00
+	WORD $0xb341; BYTE $0x0f
+	LONG $0x2069c3c4; WORD $0x00d3
 	VPBROADCASTB X2, Y2
 	MOVQ         in_len+56(FP), CX
 	SHRQ         $5, CX
