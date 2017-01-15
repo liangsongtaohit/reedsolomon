@@ -5,10 +5,10 @@
 // func gfMulAVX2(low, high, in, out []byte)
 TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 	// table -> ymm
-	MOVQ    lowTable+0(FP), AX   // it's not intel OP code MOVQ, it's more like MOV
+	MOVQ    lowTable+0(FP), AX   // it's not just MOVQ, it's more like MOV
 	MOVQ    highTable+24(FP), BX
 	VMOVDQU (AX), X0             // 128-bit Intel® AVX instructions operate on the lower 128 bits of the YMM registers and zero the upper 128 bits
-	VMOVDQU (BX), X1
+	VMOVDQU (BX), X1             // avoiding AVX-SSE Transition Penalties
 
 	// [0..0,X0] -> [X0, X0]
 	VINSERTI128 $1, X0, Y0, Y0 // low_table -> ymm0
@@ -17,8 +17,8 @@ TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 	MOVQ        out+72(FP), BX // out_add -> BX
 
 	// mask -> ymm
-	WORD $0xb341; BYTE $0x0f        // MOV $0x0f, R11B
-	LONG $0x2069c3c4; WORD $0x00d3  // VPINSRB $0x00, R11D, XMM2, XMM2
+	WORD $0x0fb2                    // MOV $0x0f, DL. Please don't use R8-R15 here, because it need one more byte for instruction decode
+	LONG $0x2069e3c4; WORD $0x00d2  // VPINSRB $0x00, EDX, XMM2, XMM2
 	VPBROADCASTB X2, Y2             // [1111,1111,1111...1111]
 
 	// if done
@@ -63,8 +63,8 @@ TEXT ·gfMulXorAVX2(SB), NOSPLIT, $0
 	VINSERTI128  $1, X1, Y1, Y1
 	MOVQ         in+48(FP), AX
 	MOVQ         out+72(FP), BX
-	WORD $0xb341; BYTE $0x0f
-	LONG $0x2069c3c4; WORD $0x00d3
+	WORD $0x0fb2
+	LONG $0x2069e3c4; WORD $0x00d2
 	VPBROADCASTB X2, Y2
 	MOVQ         in_len+56(FP), CX
 	SHRQ         $5, CX

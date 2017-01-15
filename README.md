@@ -16,8 +16,8 @@ inverse table etc. We can get more info about how galois field work
 and physics cores number will be the pipeline number(it's as fast as more goroutines, even faster.And it saves power too :D )
 5. 32768 bytes(it's the L1 data cache size of many kinds of CPU,small unit is more cache-friendly) will be the default concurrency unit,
    it improve performance greatly(especially when the data shard's size is large).
-6. Go1.7 have added some new instruction, and some are what we need here. The byte codes in asm files are changed to
-instructions now (unfortunately, I added some new byte codes)
+6. Go1.7 have added some new instruction, and some are what we need here. The byte sequence in asm files are changed to
+instructions now (unfortunately, I added some new bytes)
 7. Delete inverse matrix cache part, it’s a statistical fact that only 2-3% shards need to be repaired.
 So I don't think it will improve performance very much
 8. Only 500 lines of codes(test & table not include), it's tiny
@@ -26,7 +26,9 @@ So I don't think it will improve performance very much
 it seems improve performance.
 11. Some of Golang's asm OP codes make me uncomfortable, especially the "MOVQ", so I use byte codes to operate the register lower part sometimes.
 I still need time to learn the golang asm more. (Thanks to [asm2plan9s](https://github.com/fwessels/asm2plan9s))
-12. ...
+12. Use TEST but no CMP, it's faster
+13. No R8-R15 register in asm codes, because it need one more byte
+14. ...
 
 # Installation
 To get the package use the standard:
