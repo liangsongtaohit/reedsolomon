@@ -152,8 +152,52 @@ func TestASM(t *testing.T) {
 	}
 }
 
+func BenchmarkCopy10x16M(b *testing.B) {
+	benchmarkCopy(b, 10, 16*1024*1024)
+}
+
+func BenchmarkCopy10x64K(b *testing.B) {
+	benchmarkCopy(b, 10, 64*1024)
+}
+
+func benchmarkCopy(b *testing.B, data, size int) {
+	in := make([]byte, data * size)
+	out := make([]byte, data * size)
+	rand.Seed(0)
+	fillRandom(in)
+	b.SetBytes(int64(size * data))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		copy(out, in)
+	}
+}
+
+func BenchmarkEncode10x1x64K(b *testing.B) {
+	benchmarkEncode(b, 10, 1, 64*1024)
+}
+
+func BenchmarkEncode10x1x128K(b *testing.B) {
+	benchmarkEncode(b, 10, 1, 128*1024)
+}
+
+func BenchmarkEncode10x1x256K(b *testing.B) {
+	benchmarkEncode(b, 10, 1, 256*1024)
+}
+
 func BenchmarkEncode10x4x16M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 16*1024*1024)
+}
+
+func BenchmarkEncode28x1x64K(b *testing.B) {
+	benchmarkEncode(b, 28, 1, 64*1024)
+}
+
+func BenchmarkEncode28x1x128K(b *testing.B) {
+	benchmarkEncode(b, 28, 1, 128*1024)
+}
+
+func BenchmarkEncode28x1x256K(b *testing.B) {
+	benchmarkEncode(b, 28, 1, 256*1024)
 }
 
 func BenchmarkEncode28x4x16M(b *testing.B) {
@@ -173,10 +217,7 @@ func benchmarkEncode(b *testing.B, data, parity, size int) {
 	b.SetBytes(int64(size * data))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err = r.Encode(dp)
-		if err != nil {
-			b.Fatal(err)
-		}
+		r.Encode(dp)
 	}
 }
 
@@ -236,10 +277,7 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	b.SetBytes(int64(size * d))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err = r.Reconst(dp, lost, true)
-		if err != nil {
-			b.Fatal(err)
-		}
+		r.Reconst(dp, lost, true)
 	}
 }
 
