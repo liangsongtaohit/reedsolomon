@@ -1,6 +1,6 @@
 # Reed-Solomon
 
-Reed-Solomon Erasure Coding engine in Go, with speeds exceeding more than 3GB/s per physics core implemented in pure Go.
+Reed-Solomon Erasure Code engine in Go, it's much faster than copy's speed in pure Go.
 
  * Coding over in GF(2^8).
  * Primitive Polynomial: x^8 + x^4 + x^3 + x^2 + 1 (0x1d)
@@ -38,7 +38,9 @@ go get github.com/templexxx/reedsolomon
 
 This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/) or [my blogs](http://templex.xyz) (more info about this package there).
 
-There are only two public function in the package: Encode and Reconst
+There are only two public function in the package: Encode, Reconst and NewMatrix
+
+NewMatrix: return a [][]byte for encode and reconst
 
 Encode : calculate parity of data shards;
 

@@ -6,7 +6,7 @@ import (
 
 type matrix [][]byte // byte[row][col]
 
-func newMatrix(rows, cols int) matrix {
+func NewMatrix(rows, cols int) matrix {
 	m := matrix(make([][]byte, rows))
 	for i := range m {
 		m[i] = make([]byte, cols)
@@ -16,7 +16,7 @@ func newMatrix(rows, cols int) matrix {
 
 // return identity matrix(upper) cauchy matrix(lower)
 func genEncodeMatrix(rows, cols int) matrix {
-	m := newMatrix(rows, cols)
+	m := NewMatrix(rows, cols)
 	// identity matrix
 	for j := 0; j < cols; j++ {
 		m[j][j] = byte(1)
@@ -46,7 +46,7 @@ func (m matrix) invert() (matrix, error) {
 
 // IN -> (IN|I)
 func (m matrix) augIM(iM matrix) (matrix, error) {
-	result := newMatrix(len(m), len(m[0])+len(iM[0]))
+	result := NewMatrix(len(m), len(m[0])+len(iM[0]))
 	for r, row := range m {
 		for c := range row {
 			result[r][c] = m[r][c]
@@ -119,7 +119,7 @@ func (m matrix) gaussJordan() error {
 }
 
 func identityMatrix(n int) matrix {
-	m := newMatrix(n, n)
+	m := NewMatrix(n, n)
 	for i := 0; i < n; i++ {
 		m[i][i] = byte(1)
 	}
@@ -128,7 +128,7 @@ func identityMatrix(n int) matrix {
 
 // (I|OUT) -> OUT
 func (m matrix) subMatrix(size int) matrix {
-	result := newMatrix(size, size)
+	result := NewMatrix(size, size)
 	for r := 0; r < size; r++ {
 		for c := size; c < size*2; c++ {
 			result[r][c-size] = m[r][c]

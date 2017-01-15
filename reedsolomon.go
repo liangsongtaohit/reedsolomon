@@ -35,7 +35,7 @@ func New(d, p int) (*rs, error) {
 	}
 	e := genEncodeMatrix(r.shards, d) // create encoding matrix
 	r.m = e
-	r.gen = newMatrix(p, d)
+	r.gen = NewMatrix(p, d)
 	for i := range r.gen {
 		r.gen[i] = r.m[d+i]
 	}

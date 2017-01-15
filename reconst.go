@@ -34,7 +34,7 @@ func (r *rs) Reconst(dp matrix, lost []int, repairParity bool) error {
 }
 
 func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, size int) error {
-	decodeMatrix := newMatrix(numData, numData)
+	decodeMatrix := NewMatrix(numData, numData)
 	// TODO use survived map but not copy data
 	survivedMap := make(map[int]int)
 	numShards := len(encodeMatrix)
@@ -64,7 +64,7 @@ func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, s
 	}
 	// fill generator matrix with lost rows of decode matrix
 	numDL := len(dataLost)
-	gen := newMatrix(numDL, numData)
+	gen := NewMatrix(numDL, numData)
 	outputMap := make(map[int]int)
 	for i, l := range dataLost {
 		gen[i] = decodeMatrix[l]
@@ -75,7 +75,7 @@ func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, s
 }
 
 func reconstParity(encodeMatrix, dp matrix, parityLost []int, numData, size int) {
-	subGen := newMatrix(len(parityLost), numData)
+	subGen := NewMatrix(len(parityLost), numData)
 	outputMap := make(map[int]int)
 	for i := range subGen {
 		l := parityLost[i]

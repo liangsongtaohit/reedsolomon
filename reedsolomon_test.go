@@ -12,7 +12,7 @@ func TestEncode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dp := newMatrix(13, size)
+	dp := NewMatrix(13, size)
 	rand.Seed(0)
 	for s := 0; s < 13; s++ {
 		fillRandom(dp[s])
@@ -21,7 +21,7 @@ func TestEncode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	badDP := newMatrix(13, 100)
+	badDP := NewMatrix(13, 100)
 	badDP[0] = make([]byte, 1)
 	err = r.Encode(badDP)
 	if err != ErrShardSize {
@@ -70,7 +70,7 @@ func TestReconst(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dp := newMatrix(13, size)
+	dp := NewMatrix(13, size)
 	rand.Seed(0)
 	for s := 0; s < 10; s++ {
 		fillRandom(dp[s])
@@ -80,7 +80,7 @@ func TestReconst(t *testing.T) {
 		t.Fatal(err)
 	}
 	// restore encode result
-	store := newMatrix(3, size)
+	store := NewMatrix(3, size)
 	store[0] = dp[0]
 	store[1] = dp[4]
 	store[2] = dp[12]
@@ -127,7 +127,7 @@ func TestASM(t *testing.T) {
 		t.Fatal(err)
 	}
 	// asm
-	dp := newMatrix(d+p, size)
+	dp := NewMatrix(d+p, size)
 	rand.Seed(0)
 	for i := 0; i < d; i++ {
 		fillRandom(dp[i])
@@ -137,7 +137,7 @@ func TestASM(t *testing.T) {
 		t.Fatal(err)
 	}
 	// mulTable
-	mDP := newMatrix(d+p, size)
+	mDP := NewMatrix(d+p, size)
 	for i := 0; i < d; i++ {
 		mDP[i] = dp[i]
 	}
@@ -165,7 +165,7 @@ func benchmarkEncode(b *testing.B, data, parity, size int) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	dp := newMatrix(data+parity, size)
+	dp := NewMatrix(data+parity, size)
 	rand.Seed(0)
 	for i := 0; i < data; i++ {
 		fillRandom(dp[i])
@@ -217,7 +217,7 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	dp := newMatrix(d+p, size)
+	dp := NewMatrix(d+p, size)
 	rand.Seed(0)
 	for s := 0; s < d; s++ {
 		fillRandom(dp[s])
