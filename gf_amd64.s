@@ -18,8 +18,8 @@ TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 
 	// mask -> ymm
 	WORD $0xb341; BYTE $0x0f        // MOV $0x0f, R11B
-	LONG $0x2069c3c4; WORD $0x00d3 // VPINSRB $0x00, R11D, XMM2, XMM2
-	VPBROADCASTB X2, Y2            // [1111,1111,1111...1111]
+	LONG $0x2069c3c4; WORD $0x00d3  // VPINSRB $0x00, R11D, XMM2, XMM2
+	VPBROADCASTB X2, Y2             // [1111,1111,1111...1111]
 
 	// if done
 	MOVQ  in_len+56(FP), CX // in_len -> CX
@@ -40,7 +40,7 @@ loop:
 
 	// gf add low, high 4-bit & output
 	VPXOR   Y6, Y7, Y3
-	VMOVDQU Y3, (BX)   // can't use Non-Temporal Hint here, because "out" will be read many times
+	VMOVDQU Y3, (BX)   // it will loss performance if use Non-Temporal Hint here, because "out" will be read for next data shard encoding
 
 	// next loop
 	ADDQ $32, AX
