@@ -26,7 +26,8 @@ So I don't think it will improve performance very much
 it seems improve performance.
 11. Some of Golang's asm OP codes make me uncomfortable, especially the "MOVQ", so I use byte codes to operate the register lower part sometimes.
 I still need time to learn the golang asm more. (Thanks to [asm2plan9s](https://github.com/fwessels/asm2plan9s))
-12. Use TEST but no CMP, it's faster
+12. I heared that TEST is faster than CMP, so I use TEST in my codes.But I find
+    they have same speed
 13. No R8-R15 register in asm codes, because it need one more byte
 14. ...
 
