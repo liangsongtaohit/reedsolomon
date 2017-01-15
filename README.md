@@ -29,7 +29,8 @@ I still need time to learn the golang asm more. (Thanks to [asm2plan9s](https://
 12. I heared that TEST is faster than CMP, so I use TEST in my codes.But I find
     they have same speed
 13. No R8-R15 register in asm codes, because it need one more byte
-14. ...
+14. Use PREFETCHT0 for cache a part of parity, performance may improve a little bit
+15. ...
 
 # Installation
 To get the package use the standard:
@@ -61,16 +62,16 @@ Performance depends mainly on:
 
 Example of performance on my MacBook 2014-mid(i5-4278U 2.6GHz 2 physical cores). The 16MB per shards.
 
-| Encode/Reconst | data+Parity/data+Lost    | Speed (MB/S) | MacBook (i7-6700HQ)|
-|----------------|--------------------------|--------------|--------------------|
-|      E         | 10+4       |6629.72  | 14379.51 MB/S|
-| E              | 28+4       | 7524.88  | 15542.39 MB/S|
-| R              | 10+1       | 15198.09 |
+| Encode/Reconst | data+Parity/data+Lost    | Speed (MB/S) |
+|----------------|--------------------------|--------------|
+|      E         | 10+4       |6629.72  |
+| E              | 28+4       | 7776.14  |
+| R              | 10+1       | 15291.51 |
 | R              | 10+2       | 10993.94  |
-| R              | 10+3       | 8559.67  |
-| R              | 10+4      | 5283.62  |
-| R              | 28+1 | 16735.21  |
-| R              | 28+2 | 12581.73  |
+| R              | 10+3       | 8851.90  |
+| R              | 10+4      | 5634.62 |
+| R              | 28+1 | 17537.94  |
+| R              | 28+2 | 12766.61  |
 | R              | 28+3 | 9783.60  |
 | R              | 28+4 | 7788.79  |
 
