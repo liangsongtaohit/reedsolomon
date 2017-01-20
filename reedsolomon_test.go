@@ -8,7 +8,7 @@ import (
 
 func TestEncode(t *testing.T) {
 	size := 50000
-	r, err := New(10, 3)
+	r, err := New(10, 3, 32*1024)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,8 +29,9 @@ func TestEncode(t *testing.T) {
 	}
 }
 
+// test low, high table work
 func TestVerifyEncode(t *testing.T) {
-	r, err := New(5, 5)
+	r, err := New(5, 5, 32*1024)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,9 +65,10 @@ func TestVerifyEncode(t *testing.T) {
 	}
 }
 
+// can it reconst data?
 func TestReconst(t *testing.T) {
-	size := 5111
-	r, err := New(10, 3)
+	size := 64 * 1024
+	r, err := New(10, 3, 32*1024)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,11 +120,13 @@ func TestReconst(t *testing.T) {
 	}
 }
 
+// will asm encode be same as lookup table
 func TestASM(t *testing.T) {
 	d := 10
 	p := 4
-	size := 9999
-	r, err := New(d, p)
+	// larger than 32 * 1024
+	size := 65 * 1024
+	r, err := New(d, p, 32*1024)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,60 +156,36 @@ func TestASM(t *testing.T) {
 	}
 }
 
-func BenchmarkCopy10x16M(b *testing.B) {
-	benchmarkCopy(b, 10, 16*1024*1024)
+//func BenchmarkEncode10x4x16M16(b *testing.B) {
+	//benchmarkEncode(b, 10, 4, 16*1024*1024, 16*1024)
+//}
+
+//func BenchmarkEncode10x4x16M31U(b *testing.B) {
+	//benchmarkEncode(b, 10, 4, 16*1024*1024, 31*1024)
+//}
+
+//func BenchmarkEncode28x4x16M12U(b *testing.B) {
+  //benchmarkEncode(b, 28, 4, 16*1024*1024, 12*1024)
+//}
+
+//func BenchmarkEncode28x4x16M14U(b *testing.B) {
+  //benchmarkEncode(b, 28, 4, 16*1024*1024, 14*1024)
+//}
+func BenchmarkEncode6x3x64K16U(b *testing.B) {
+	benchmarkEncode(b, 6, 3, 64*1024, 16*1024)
 }
 
-func BenchmarkCopy10x64K(b *testing.B) {
-	benchmarkCopy(b, 10, 64*1024)
-}
+//func BenchmarkEncode28x4x16M20U(b *testing.B) {
+  //benchmarkEncode(b, 28, 4, 16*1024*1024, 20*1024)
+//}
 
-func benchmarkCopy(b *testing.B, data, size int) {
-	in := make([]byte, data * size)
-	out := make([]byte, data * size)
-	rand.Seed(0)
-	fillRandom(in)
-	b.SetBytes(int64(size * data))
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		copy(out, in)
-	}
-}
+//func BenchmarkEncode28x4x1M32(b *testing.B) {
+	//benchmarkEncode(b, 28, 4, 1*1024*1024, 32*1024)
+//}
 
-func BenchmarkEncode10x1x64K(b *testing.B) {
-	benchmarkEncode(b, 10, 1, 64*1024)
-}
 
-func BenchmarkEncode10x1x128K(b *testing.B) {
-	benchmarkEncode(b, 10, 1, 128*1024)
-}
-
-func BenchmarkEncode10x1x256K(b *testing.B) {
-	benchmarkEncode(b, 10, 1, 256*1024)
-}
-
-func BenchmarkEncode10x4x16M(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 16*1024*1024)
-}
-
-func BenchmarkEncode28x1x64K(b *testing.B) {
-	benchmarkEncode(b, 28, 1, 64*1024)
-}
-
-func BenchmarkEncode28x1x128K(b *testing.B) {
-	benchmarkEncode(b, 28, 1, 128*1024)
-}
-
-func BenchmarkEncode28x1x256K(b *testing.B) {
-	benchmarkEncode(b, 28, 1, 256*1024)
-}
-
-func BenchmarkEncode28x4x16M(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 16*1024*1024)
-}
-
-func benchmarkEncode(b *testing.B, data, parity, size int) {
-	r, err := New(data, parity)
+func benchmarkEncode(b *testing.B, data, parity, size, unit int) {
+	r, err := New(data, parity, unit)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -221,40 +201,40 @@ func benchmarkEncode(b *testing.B, data, parity, size int) {
 	}
 }
 
-func BenchmarkReconst10x4x16mRepair1(b *testing.B) {
+func BenchmarkReconst10x4x16MRepair1(b *testing.B) {
 	benchmarkReconst(b, 10, 4, 16*1024*1024, 1)
 }
 
-func BenchmarkReconst10x4x16mRepair2(b *testing.B) {
+func BenchmarkReconst10x4x16MRepair2(b *testing.B) {
 	benchmarkReconst(b, 10, 4, 16*1024*1024, 2)
 }
 
-func BenchmarkReconst10x4x16mRepair3(b *testing.B) {
+func BenchmarkReconst10x4x16MRepair3(b *testing.B) {
 	benchmarkReconst(b, 10, 4, 16*1024*1024, 3)
 }
 
-func BenchmarkReconst10x4x16mRepair4(b *testing.B) {
+func BenchmarkReconst10x4x16MRepair4(b *testing.B) {
 	benchmarkReconst(b, 10, 4, 16*1024*1024, 4)
 }
 
-func BenchmarkReconst28x4x16mRepair1(b *testing.B) {
+func BenchmarkReconst28x4x16MRepair1(b *testing.B) {
 	benchmarkReconst(b, 28, 4, 16*1024*1024, 1)
 }
 
-func BenchmarkReconst28x4x16mRepair2(b *testing.B) {
+func BenchmarkReconst28x4x16MRepair2(b *testing.B) {
 	benchmarkReconst(b, 28, 4, 16*1024*1024, 2)
 }
 
-func BenchmarkReconst28x4x16mRepair3(b *testing.B) {
+func BenchmarkReconst28x4x16MRepair3(b *testing.B) {
 	benchmarkReconst(b, 28, 4, 16*1024*1024, 3)
 }
 
-func BenchmarkReconst28x4x16mRepair4(b *testing.B) {
+func BenchmarkReconst28x4x16MRepair4(b *testing.B) {
 	benchmarkReconst(b, 28, 4, 16*1024*1024, 4)
 }
 
 func benchmarkReconst(b *testing.B, d, p, size, repair int) {
-	r, err := New(d, p)
+	r, err := New(d, p, 32*1024)
 	if err != nil {
 		b.Fatal(err)
 	}

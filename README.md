@@ -59,12 +59,12 @@ Performance depends mainly on:
 5. size of shards
 6. speed of memory(waste so much time on read/write mem, :D )
 
-Example of performance on my MacBook 2014-mid(i5-4278U 2.6GHz 2 physical cores). The 16MB per shards.
+Example of performance on my MacBook 2014-mid(i5-4278U 2.6GHz 2 physical cores). The 1MB per shards.
 
 | Encode/Reconst | data+Parity/data+Lost    | Speed (MB/S) |
 |----------------|--------------------------|--------------|
 |      E         | 10+4       |6629.72  |
-| E              | 28+4       | 7776.14  |
+| E              | 28+4       | 8145.91  |
 | R              | 10+1       | 15291.51 |
 | R              | 10+2       | 10993.94  |
 | R              | 10+3       | 8851.90  |

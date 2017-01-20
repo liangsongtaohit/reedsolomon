@@ -18,24 +18,23 @@ func (r *rs) Reconst(dp matrix, lost []int, repairParity bool) error {
 	if len(lost) > r.parity {
 		return ErrTooFewShards
 	}
-	dataLost, parityLost := splitLost(lost, r.data, r.parity)
+	dataLost, parityLost := splitLost(lost, r.data)
 	sort.Ints(dataLost)
 	sort.Ints(parityLost)
 	if len(dataLost) > 0 {
-		err = reconstData(r.m, dp, dataLost, parityLost, r.data, size)
+		err = reconstData(r.m, dp, dataLost, parityLost, r.data, size, r.unit)
 		if err != nil {
 			return err
 		}
 	}
 	if len(parityLost) > 0 && repairParity {
-		reconstParity(r.m, dp, parityLost, r.data, size)
+		reconstParity(r.m, dp, parityLost, r.data, size, r.unit)
 	}
 	return nil
 }
 
-func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, size int) error {
+func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, size, unit int) error {
 	decodeMatrix := NewMatrix(numData, numData)
-	// TODO use survived map but not copy data
 	survivedMap := make(map[int]int)
 	numShards := len(encodeMatrix)
 	// fill with survived data
@@ -70,26 +69,26 @@ func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, s
 		gen[i] = decodeMatrix[l]
 		outputMap[i] = l
 	}
-	encodeRunner(gen, dp, numData, numDL, size, survivedMap, outputMap)
+	encodeRunner(gen, dp, numData, numDL, size, survivedMap, outputMap, unit)
 	return nil
 }
 
-func reconstParity(encodeMatrix, dp matrix, parityLost []int, numData, size int) {
-	subGen := NewMatrix(len(parityLost), numData)
+func reconstParity(encodeMatrix, dp matrix, parityLost []int, numData, size, unit int) {
+	gen := NewMatrix(len(parityLost), numData)
 	outputMap := make(map[int]int)
-	for i := range subGen {
+	for i := range gen {
 		l := parityLost[i]
-		subGen[i] = encodeMatrix[l]
+		gen[i] = encodeMatrix[l]
 		outputMap[i] = l
 	}
 	inMap := make(map[int]int)
 	for i := 0; i < numData; i++ {
 		inMap[i] = i
 	}
-	encodeRunner(subGen, dp, numData, len(parityLost), size, inMap, outputMap)
+	encodeRunner(gen, dp, numData, len(parityLost), size, inMap, outputMap, unit)
 }
 
-func splitLost(lost []int, d, p int) ([]int, []int) {
+func splitLost(lost []int, d int) ([]int, []int) {
 	var dataLost []int
 	var parityLost []int
 	for _, l := range lost {

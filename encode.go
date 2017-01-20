@@ -25,12 +25,12 @@ func (r *rs) Encode(dp matrix) error {
 	for i := r.data; i < r.shards; i++ {
 		outMap[i-r.data] = i
 	}
-	encodeRunner(r.gen, dp, r.data, r.parity, size, inMap, outMap)
+	encodeRunner(r.gen, dp, r.data, r.parity, size, inMap, outMap, r.unit)
 	return nil
 }
 
-func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int]int) {
-	pipeline := cpuid.CPU.PhysicalCores
+func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int]int, unit int) {
+	pipeline := cpuid.CPU.PhysicalCores / 2
 	offsets := make(chan [2]int, pipeline)
 	wg := &sync.WaitGroup{}
 	wg.Add(pipeline)
@@ -38,7 +38,7 @@ func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int
 		go encodeWorker(offsets, wg, gen, dp, numIn, numOut, inMap, outMap)
 	}
 	start := 0
-	unitSize := 32 * 1024 // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size)
+	unitSize := unit // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size)
 	do := unitSize
 	for start < size {
 		if start+do <= size {
@@ -66,7 +66,7 @@ func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, dp matrix, numIn
 			for oi := 0; oi < numOut; oi++ {
 				k := outMap[oi]
 				c := gen[oi][i]
-				if i == 0 { // it means don't need to copy data from data for xor
+				if i == 0 { // it means don't need to copy parity data for xor
 					gfMulAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
 				} else {
 					gfMulXorAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
