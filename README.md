@@ -1,6 +1,8 @@
 # Reed-Solomon
 
-Reed-Solomon Erasure Code engine in Go, it's much faster than copy's speed in pure Go.
+Reed-Solomon Erasure Code engine in pure Go.
+
+More than 3GB/s per physics core
 
  * Coding over in GF(2^8).
  * Primitive Polynomial: x^8 + x^4 + x^3 + x^2 + 1 (0x1d)
@@ -8,13 +10,13 @@ Reed-Solomon Erasure Code engine in Go, it's much faster than copy's speed in pu
 It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolomon), with some optimizations/changes:
 
 1. Only support AVX2. I think SSSE3 maybe out of date
-2. Use Cauchy matrix as generator matrix, we can use it directly.Vandermonde matrix need some operation for preserving the 
+2. Use Cauchy matrix as generator matrix, we can use it directly.Vandermonde matrix need some operation for preserving the
 property that any square subset of rows is invertible(and I think there is a way to optimize inverse matrix's performance, I need some time to make it)
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
 4. Use a "pipeline mode" for encoding concurrency,
 and physics cores number will be the pipeline number(it's as fast as more goroutines, even faster.And it saves power too :D )
-5. 32768 bytes(it's the L1 data cache size of many kinds of CPU,small unit is more cache-friendly) will be the default concurrency unit,
+5. 16*1024 bytes(it's a half of L1 data cache size of many kinds of CPU) will be the default concurrency unit,
    it improve performance greatly(especially when the data shard's size is large).
 6. Go1.7 have added some new instruction, and some are what we need here. The byte sequence in asm files are changed to
 instructions now (unfortunately, I added some new bytes)
@@ -52,7 +54,7 @@ Reconst: calculate data or parity from present shards;
 Performance depends mainly on:
 
 1. number of parity shards
-2. number of cores of CPU（linear dependence, n-core cpu performance = one * n）
+2. number of cores of CPU
 3. CPU instruction extension(only support AVX2)
 4. unit size of concurrence
 5. size of shards
@@ -61,17 +63,17 @@ Performance depends mainly on:
 Example of performance on my MacBook 2014-mid(i5-4278U 2.6GHz 2 physical cores). The 1MB per shards.
 
 | Encode/Reconst | data+Parity/data+Lost    | Speed (MB/S) |
-|----------------|--------------------------|--------------|
-|      E         | 10+4       |6629.72  |
-| E              | 28+4       | 8145.91  |
-| R              | 10+1       | 15291.51 |
-| R              | 10+2       | 10993.94  |
-| R              | 10+3       | 8851.90  |
-| R              | 10+4      | 5634.62 |
-| R              | 28+1 | 17537.94  |
-| R              | 28+2 | 12766.61  |
-| R              | 28+3 | 9783.60  |
-| R              | 28+4 | 7788.79  |
+|----------------|-------------------|--------------|
+| E              |      10+4       |6629.72  |
+| E              |      28+4       | 8145.91  |
+| R              |      10+1       | 15291.51 |
+| R              |      10+2       | 10993.94  |
+| R              |      10+3       | 8851.90  |
+| R              |      10+4      | 5634.62 |
+| R              |      28+1 | 17537.94  |
+| R              |      28+2 | 12766.61  |
+| R              |      28+3 | 9783.60  |
+| R              |      28+4 | 7788.79  |
 
 # Links
 * [Klauspost ReedSolomon](https://github.com/klauspost/reedsolom)
