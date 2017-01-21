@@ -111,7 +111,10 @@ func benchmarkInvert(b *testing.B, size int) {
 	for i := 0; i < size; i++ {
 		fillRandom(m[i])
 	}
-	m.invert()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		m.invert()
+	}
 }
 
 // new a matrix with data

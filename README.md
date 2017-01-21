@@ -28,8 +28,7 @@ it seems improve performance.
 I still need time to learn the golang asm more. (Thanks to [asm2plan9s](https://github.com/fwessels/asm2plan9s))
 12. I heared that TEST is faster than CMP, so I use TEST in my codes.But I find they have same speed
 13. No R8-R15 register in asm codes, because it need one more byte
-14. Use PREFETCHT0 for cache a part of parity, performance may improve a little bit.But you can delete this too, anyway it can't help much
-15. ...
+14. ...
 
 # Installation
 To get the package use the standard:

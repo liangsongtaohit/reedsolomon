@@ -2,9 +2,9 @@ package reedsolomon
 
 import (
 	"errors"
-	"sync"
-
 	"github.com/klauspost/cpuid"
+	"runtime"
+	"sync"
 )
 
 // Encode : cauchy_matrix * data_matrix(input) -> parity_matrix(output)
@@ -25,12 +25,12 @@ func (r *rs) Encode(dp matrix) error {
 	for i := r.data; i < r.shards; i++ {
 		outMap[i-r.data] = i
 	}
-	encodeRunner(r.gen, dp, r.data, r.parity, size, inMap, outMap, r.unit)
+	encodeRunner(r.gen, dp, r.data, r.parity, size, inMap, outMap)
 	return nil
 }
 
-func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int]int, unit int) {
-	pipeline := cpuid.CPU.PhysicalCores / 2
+func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int]int) {
+	pipeline := pipeNum()
 	offsets := make(chan [2]int, pipeline)
 	wg := &sync.WaitGroup{}
 	wg.Add(pipeline)
@@ -38,7 +38,7 @@ func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int
 		go encodeWorker(offsets, wg, gen, dp, numIn, numOut, inMap, outMap)
 	}
 	start := 0
-	unitSize := unit // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size)
+	unitSize := 16 * 1024 // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size is 32KB)
 	do := unitSize
 	for start < size {
 		if start+do <= size {
@@ -106,4 +106,12 @@ func checkShardSize(m matrix) (int, error) {
 		}
 	}
 	return size, nil
+}
+
+func pipeNum() int {
+	if cpuid.CPU.PhysicalCores == 0 {
+		return runtime.NumCPU() / cpuid.CPU.ThreadsPerCore
+	} else {
+		return cpuid.CPU.PhysicalCores
+	}
 }
