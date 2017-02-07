@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"math/rand"
 	"testing"
+	"fmt"
+	"time"
 )
 
 func TestEncode(t *testing.T) {
@@ -97,6 +99,28 @@ func TestASM(t *testing.T) {
 			t.Fatal("verify asm failed, no match noasm version; shards: ", i)
 		}
 	}
+}
+
+func TestISALWay(t *testing.T) {
+	r, err := New(10,4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	size := 1024*1024
+	dp := NewMatrix(14, size)
+	rand.Seed(0)
+	for i := 0; i < 14; i++ {
+		fillRandom(dp[i])
+	}
+	now := time.Now()
+	for i := 0; i < 2000; i++ {
+		r.Encode(dp)
+	}
+	cost := time.Since(now)
+	var totalIO float64
+	totalIO = 14 * 1024 * 1024 * 2000 / 1000 / 1000
+	speed := totalIO / float64(cost)
+	fmt.Println("10x4x1MB encode speed:", speed, "MB/S")
 }
 
 func BenchmarkEncode10x4x1M(b *testing.B) {
