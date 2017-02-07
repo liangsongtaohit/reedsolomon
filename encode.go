@@ -2,9 +2,6 @@ package reedsolomon
 
 import (
 	"errors"
-	"github.com/klauspost/cpuid"
-	"runtime"
-	"sync"
 )
 
 // Encode : cauchy_matrix * data_matrix(input) -> parity_matrix(output)
@@ -30,36 +27,22 @@ func (r *rs) Encode(dp matrix) error {
 }
 
 func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int]int) {
-	pipeline := pipeNum()
-	offsets := make(chan [2]int, pipeline)
-	wg := &sync.WaitGroup{}
-	wg.Add(pipeline)
-	for i := 0; i < pipeline; i++ {
-		go encodeWorker(offsets, wg, gen, dp, numIn, numOut, inMap, outMap)
-	}
 	start := 0
 	unitSize := 16 * 1024 // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size is 32KB)
 	do := unitSize
 	for start < size {
 		if start+do <= size {
-			offset := [2]int{start, do}
-			offsets <- offset
+			encodeWorker(gen, dp, start, do, numIn, numOut, inMap, outMap)
 			start = start + do
 		} else {
 			encodeRemain(start, size, gen, dp, numIn, numOut, inMap, outMap)
 			start = size
 		}
 	}
-	close(offsets)
-	wg.Wait()
 }
 
-func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
-	defer wg.Done()
-	for offset := range offsets {
-		start := offset[0]
-		do := offset[1]
-		end := start + do
+func encodeWorker(gen, dp matrix, start, do, numIn, numOut int, inMap, outMap map[int]int) {
+	end := start + do
 		for i := 0; i < numIn; i++ {
 			j := inMap[i]
 			in := dp[j]
@@ -73,7 +56,6 @@ func encodeWorker(offsets chan [2]int, wg *sync.WaitGroup, gen, dp matrix, numIn
 				}
 			}
 		}
-	}
 }
 
 func encodeRemain(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
@@ -106,12 +88,4 @@ func checkShardSize(m matrix) (int, error) {
 		}
 	}
 	return size, nil
-}
-
-func pipeNum() int {
-	if cpuid.CPU.PhysicalCores == 0 {
-		return runtime.NumCPU() / cpuid.CPU.ThreadsPerCore
-	} else {
-		return cpuid.CPU.PhysicalCores
-	}
 }
