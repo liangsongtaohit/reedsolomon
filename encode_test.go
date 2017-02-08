@@ -106,21 +106,21 @@ func TestISALWay(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	size := 1024*1024
+	size := 16*1024*1024
 	dp := NewMatrix(14, size)
 	rand.Seed(0)
 	for i := 0; i < 14; i++ {
 		fillRandom(dp[i])
 	}
 	now := time.Now()
-	for i := 0; i < 2000; i++ {
+	for i := 0; i < 100; i++ {
 		r.Encode(dp)
 	}
 	cost := time.Since(now)
 	var totalIO float64
-	totalIO = 14 * 1024 * 1024 * 2000 / 1000 / 1000
-	speed := totalIO / float64(cost)
-	fmt.Println("10x4x1MB encode speed:", speed, "MB/S")
+	totalIO = 14 * float64(size) * 100 / 1000 / 1000
+	speed := totalIO / float64(cost.Seconds())
+	fmt.Printf("10x4x16MB encode speed: %.2f MB/s", speed)
 }
 
 func BenchmarkEncode10x4x1M(b *testing.B) {
