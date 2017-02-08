@@ -1,8 +1,6 @@
 package reedsolomon
 
-import (
-	"errors"
-)
+import "errors"
 
 // Encode : cauchy_matrix * data_matrix(input) -> parity_matrix(output)
 // dp : data_matrix(upper) parity_matrix(lower, empty now)
@@ -43,19 +41,19 @@ func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int
 
 func encodeWorker(gen, dp matrix, start, do, numIn, numOut int, inMap, outMap map[int]int) {
 	end := start + do
-		for i := 0; i < numIn; i++ {
-			j := inMap[i]
-			in := dp[j]
-			for oi := 0; oi < numOut; oi++ {
-				k := outMap[oi]
-				c := gen[oi][i]
-				if i == 0 { // it means don't need to copy parity data for xor
-					gfMulAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
-				} else {
-					gfMulXorAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
-				}
+	for i := 0; i < numIn; i++ {
+		j := inMap[i]
+		in := dp[j]
+		for oi := 0; oi < numOut; oi++ {
+			k := outMap[oi]
+			c := gen[oi][i]
+			if i == 0 { // it means don't need to copy parity data for xor
+				gfMulAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
+			} else {
+				gfMulXorAVX2(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
 			}
 		}
+	}
 }
 
 func encodeRemain(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {

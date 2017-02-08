@@ -2,7 +2,7 @@
 
 Reed-Solomon Erasure Code engine in pure Go.
 
-More than 3GB/s per physics core
+4GB/s per physics core
 
  * Coding over in GF(2^8).
  * Primitive Polynomial: x^8 + x^4 + x^3 + x^2 + 1 (0x1d)
@@ -14,9 +14,9 @@ It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolomon
 property that any square subset of rows is invertible(and I think there is a way to optimize inverse matrix's performance, I need some time to make it)
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
 inverse table etc. We can get more info about how galois field work
-4. Use a "pipeline mode" for encoding concurrency,
-and physics cores number will be the pipeline number(it's as fast as more goroutines, even faster.And it saves power too :D )
-5. 16*1024 bytes(it's a half of L1 data cache size of many kinds of CPU) will be the default concurrency unit,
+4. Use a single core to encode. If you want use more, please see the history of "encode.go"(it use a "pipeline mode" for encoding concurrency,
+and physics cores number will be the pipeline number)
+5. 16*1024 bytes(it's a half of L1 data cache size of many kinds of CPU) will be the default calculate/concurrency unit,
    it improve performance greatly(especially when the data shard's size is large).
 6. Go1.7 have added some new instruction, and some are what we need here. The byte sequence in asm files are changed to
 instructions now (unfortunately, I added some new bytes)
@@ -30,7 +30,8 @@ it seems improve performance.
 I still need time to learn the golang asm more. (Thanks to [asm2plan9s](https://github.com/fwessels/asm2plan9s))
 12. I heared that TEST is faster than CMP, so I use TEST in my codes.But I find they have same speed
 13. No R8-R15 register in asm codes, because it need one more byte
-14. ...
+14. Only import Golang standard library
+15. ...
 
 # Installation
 To get the package use the standard:
@@ -40,7 +41,7 @@ go get github.com/templexxx/reedsolomon
 
 # Usage
 
-This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/) or [my blogs](http://templex.xyz) (more info about this package there).
+This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/) or [my blogs](http://templex.xyz) (more info about this package there, but in Chinese).
 
 There are only two public function in the package: Encode, Reconst and NewMatrix
 
@@ -54,13 +55,14 @@ Reconst: calculate data or parity from present shards;
 Performance depends mainly on:
 
 1. number of parity shards
-2. number of cores of CPU
+2. number of cores of CPU (if you want to use parallel version)
 3. CPU instruction extension(only support AVX2)
 4. unit size of concurrence
 5. size of shards
 6. speed of memory(waste so much time on read/write mem, :D )
 
 Example of performance on my MacBook 2014-mid(i5-4278U 2.6GHz 2 physical cores). The 1MB per shards.
+Single core work here:
 
 | Encode/Reconst | data+Parity/data+Lost    | Speed (MB/S) |
 |----------------|-------------------|--------------|
