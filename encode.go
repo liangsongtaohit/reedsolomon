@@ -20,7 +20,11 @@ func (r *rs) Encode(dp matrix) error {
 	for i := r.data; i < r.shards; i++ {
 		outMap[i-r.data] = i
 	}
-	encodeRunner(r.gen, dp, r.data, r.parity, size, inMap, outMap)
+	if r.ins == avx2 {
+		encodeRunner(r.gen, dp, r.data, r.parity, size, inMap, outMap)
+	} else {
+		encodeRunnerS(r.gen, dp, r.data, r.parity, size, inMap, outMap)
+	}
 	return nil
 }
 
@@ -35,6 +39,55 @@ func encodeRunner(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int
 		} else {
 			encodeRemain(start, size, gen, dp, numIn, numOut, inMap, outMap)
 			start = size
+		}
+	}
+}
+
+func encodeRunnerS(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[int]int) {
+	start := 0
+	unitSize := 16 * 1024 // concurrency unit size（Haswell， Skylake， Kabylake's L1 data cache size is 32KB)
+	do := unitSize
+	for start < size {
+		if start+do <= size {
+			encodeWorkerS(gen, dp, start, do, numIn, numOut, inMap, outMap)
+			start = start + do
+		} else {
+			encodeRemainS(start, size, gen, dp, numIn, numOut, inMap, outMap)
+			start = size
+		}
+	}
+}
+
+func encodeWorkerS(gen, dp matrix, start, do, numIn, numOut int, inMap, outMap map[int]int) {
+	end := start + do
+	for i := 0; i < numIn; i++ {
+		j := inMap[i]
+		in := dp[j]
+		for oi := 0; oi < numOut; oi++ {
+			k := outMap[oi]
+			c := gen[oi][i]
+			if i == 0 { // it means don't need to copy parity data for xor
+				gfMulSSSE3(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
+			} else {
+				gfMulXorSSSE3(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
+			}
+		}
+	}
+}
+
+func encodeRemainS(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
+	do := size - start
+	for i := 0; i < numIn; i++ {
+		j := inMap[i]
+		in := dp[j]
+		for oi := 0; oi < numOut; oi++ {
+			k := outMap[oi]
+			c := gen[oi][i]
+			if i == 0 {
+				gfMulRemain(c, in[start:size], dp[k][start:size], do)
+			} else {
+				gfMulRemainXor(c, in[start:size], dp[k][start:size], do)
+			}
 		}
 	}
 }

@@ -99,8 +99,55 @@ func TestASM(t *testing.T) {
 	}
 }
 
+func TestSSSE3(t *testing.T) {
+	d := 10
+	p := 4
+	size := 65 * 1024
+	r, err := New(d, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r.ins = ssse3
+	// asm
+	dp := NewMatrix(d+p, size)
+	rand.Seed(0)
+	for i := 0; i < d; i++ {
+		fillRandom(dp[i])
+	}
+	err = r.Encode(dp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// mulTable
+	mDP := NewMatrix(d+p, size)
+	for i := 0; i < d; i++ {
+		mDP[i] = dp[i]
+	}
+	err = r.noasmEncode(mDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, asm := range dp {
+		if !bytes.Equal(asm, mDP[i]) {
+			t.Fatal("verify asm failed, no match noasm version; shards: ", i)
+		}
+	}
+}
+
 func BenchmarkEncode10x4x1M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 1024*1024)
+}
+
+func BenchmarkEncode28x4x1M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 1024*1024)
+}
+
+func BenchmarkEncode28x4x4M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 4*1024*1024)
+}
+
+func BenchmarkEncode28x4x16M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 16*1024*1024)
 }
 
 func BenchmarkEncode10x4x4M(b *testing.B) {
