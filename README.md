@@ -9,7 +9,7 @@ Reed-Solomon Erasure Code engine in pure Go.
 
 It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolomon), with some optimizations/changes:
 
-1. Only support AVX2. I think SSSE3 maybe out of date
+1. Support AVX2 and SSSE3
 2. Use Cauchy matrix as generator matrix, we can use it directly.Vandermonde matrix need some operation for preserving the
 property that any square subset of rows is invertible(and I think there is a way to optimize inverse matrix's performance, I need some time to make it)
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
@@ -56,7 +56,7 @@ Performance depends mainly on:
 
 1. number of parity shards
 2. number of cores of CPU (if you want to use parallel version)
-3. CPU instruction extension(only support AVX2)
+3. CPU instruction extension(AVX2 or SSSE3)
 4. unit size of concurrence
 5. size of shards
 6. speed of memory(waste so much time on read/write mem, :D )

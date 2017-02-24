@@ -58,40 +58,6 @@ func encodeRunnerS(gen, dp matrix, numIn, numOut, size int, inMap, outMap map[in
 	}
 }
 
-func encodeWorkerS(gen, dp matrix, start, do, numIn, numOut int, inMap, outMap map[int]int) {
-	end := start + do
-	for i := 0; i < numIn; i++ {
-		j := inMap[i]
-		in := dp[j]
-		for oi := 0; oi < numOut; oi++ {
-			k := outMap[oi]
-			c := gen[oi][i]
-			if i == 0 { // it means don't need to copy parity data for xor
-				gfMulSSSE3(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
-			} else {
-				gfMulXorSSSE3(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
-			}
-		}
-	}
-}
-
-func encodeRemainS(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
-	do := size - start
-	for i := 0; i < numIn; i++ {
-		j := inMap[i]
-		in := dp[j]
-		for oi := 0; oi < numOut; oi++ {
-			k := outMap[oi]
-			c := gen[oi][i]
-			if i == 0 {
-				gfMulRemain(c, in[start:size], dp[k][start:size], do)
-			} else {
-				gfMulRemainXor(c, in[start:size], dp[k][start:size], do)
-			}
-		}
-	}
-}
-
 func encodeWorker(gen, dp matrix, start, do, numIn, numOut int, inMap, outMap map[int]int) {
 	end := start + do
 	for i := 0; i < numIn; i++ {
@@ -110,6 +76,40 @@ func encodeWorker(gen, dp matrix, start, do, numIn, numOut int, inMap, outMap ma
 }
 
 func encodeRemain(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
+	do := size - start
+	for i := 0; i < numIn; i++ {
+		j := inMap[i]
+		in := dp[j]
+		for oi := 0; oi < numOut; oi++ {
+			k := outMap[oi]
+			c := gen[oi][i]
+			if i == 0 {
+				gfMulRemain(c, in[start:size], dp[k][start:size], do)
+			} else {
+				gfMulRemainXor(c, in[start:size], dp[k][start:size], do)
+			}
+		}
+	}
+}
+
+func encodeWorkerS(gen, dp matrix, start, do, numIn, numOut int, inMap, outMap map[int]int) {
+	end := start + do
+	for i := 0; i < numIn; i++ {
+		j := inMap[i]
+		in := dp[j]
+		for oi := 0; oi < numOut; oi++ {
+			k := outMap[oi]
+			c := gen[oi][i]
+			if i == 0 { // it means don't need to copy parity data for xor
+				gfMulSSSE3(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
+			} else {
+				gfMulXorSSSE3(mulTableLow[c][:], mulTableHigh[c][:], in[start:end], dp[k][start:end])
+			}
+		}
+	}
+}
+
+func encodeRemainS(start, size int, gen, dp matrix, numIn, numOut int, inMap, outMap map[int]int) {
 	do := size - start
 	for i := 0; i < numIn; i++ {
 		j := inMap[i]
