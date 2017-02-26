@@ -2,7 +2,7 @@
 
 Reed-Solomon Erasure Code engine in pure Go.
 
-More info in [my blogs](http://templex.xyz) (more info about this package there, but in Chinese)
+More info in [my blogs](http://www.templex.xyz/blog/101/reedsolomon.html) (in Chinese)
 
 4GB/s per physics core
 
