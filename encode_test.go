@@ -187,6 +187,27 @@ func benchmarkEncode(b *testing.B, data, parity, size int) {
 	}
 }
 
+func BenchmarkNOASMEncode28x4x16M(b *testing.B) {
+	benchmarkNOASMEncode(b, 28, 4, 16*1024*1024)
+}
+
+func benchmarkNOASMEncode(b *testing.B, data, parity, size int) {
+	r, err := New(data, parity)
+	if err != nil {
+		b.Fatal(err)
+	}
+	dp := NewMatrix(data+parity, size)
+	rand.Seed(0)
+	for i := 0; i < data; i++ {
+		fillRandom(dp[i])
+	}
+	b.SetBytes(int64(size * data))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.noasmEncode(dp)
+	}
+}
+
 func fillRandom(p []byte) {
 	for i := 0; i < len(p); i += 7 {
 		val := rand.Int63()
