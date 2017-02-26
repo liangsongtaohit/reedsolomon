@@ -65,6 +65,7 @@ func TestVerifyEncode(t *testing.T) {
 	}
 }
 
+// test avx2, if don't have it will test ssse3
 func TestASM(t *testing.T) {
 	d := 10
 	p := 4
@@ -123,7 +124,7 @@ func TestSSSE3(t *testing.T) {
 	for i := 0; i < d; i++ {
 		mDP[i] = dp[i]
 	}
-	err = r.noasmEncode(mDP)
+	err = r.Encode(mDP)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,6 +173,28 @@ func BenchmarkEncode17x3x16M(b *testing.B) {
 
 func benchmarkEncode(b *testing.B, data, parity, size int) {
 	r, err := New(data, parity)
+	if err != nil {
+		b.Fatal(err)
+	}
+	dp := NewMatrix(data+parity, size)
+	rand.Seed(0)
+	for i := 0; i < data; i++ {
+		fillRandom(dp[i])
+	}
+	b.SetBytes(int64(size * data))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.Encode(dp)
+	}
+}
+
+func BenchmarkSSSE3Encode28x4x16M(b *testing.B) {
+	benchmarkSSSE3Encode(b, 28, 4, 16*1024*1024)
+}
+
+func benchmarkSSSE3Encode(b *testing.B, data, parity, size int) {
+	r, err := New(data, parity)
+	r.ins = ssse3
 	if err != nil {
 		b.Fatal(err)
 	}

@@ -13,7 +13,7 @@ type rs struct {
 	shards int    // Total number of shards
 	m      matrix // encoding matrix, identity matrix(upper) + generator matrix(lower)
 	gen    matrix // generator matrix(cauchy matrix)
-	ins    int    // Extensions Instruction(avx2 ssse3)
+	ins    int    // Extensions Instruction(avx2 or ssse3)
 }
 
 const (

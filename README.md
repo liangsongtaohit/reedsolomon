@@ -2,6 +2,8 @@
 
 Reed-Solomon Erasure Code engine in pure Go.
 
+More info in [my blogs](http://templex.xyz) (more info about this package there, but in Chinese)
+
 4GB/s per physics core
 
  * Coding over in GF(2^8).
@@ -41,7 +43,7 @@ go get github.com/templexxx/reedsolomon
 
 # Usage
 
-This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/) or [my blogs](http://templex.xyz) (more info about this package there, but in Chinese).
+This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/).
 
 There are only two public function in the package: Encode, Reconst and NewMatrix
 
