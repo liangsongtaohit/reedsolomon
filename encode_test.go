@@ -7,6 +7,12 @@ import (
 	"runtime"
 )
 
+//------------
+
+func init(){
+	runtime.GOMAXPROCS(1)
+}
+
 func TestEncode(t *testing.T) {
 	size := 50000
 	r, err := New(10, 3)
@@ -192,12 +198,6 @@ func noasmGfVectMulXor(c byte, in, out []byte) {
 	for i := 0; i < len(in); i++ {
 		out[i] ^= mt[in[i]]
 	}
-}
-
-//------------
-
-func init(){
-	runtime.GOMAXPROCS(1)
 }
 
 func BenchmarkEncode28x4x16_M(b *testing.B) {
