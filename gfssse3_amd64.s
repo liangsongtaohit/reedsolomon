@@ -35,7 +35,7 @@ loop:
 	MOVOU	(AX), X4 // in_data -> X4
 	MOVOU   X4, X5  // in_data_copy -> X5
 	PAND    X3, X4  // in_data_low -> X4
-	PSRLQ   $4, X5
+	PSRLQ   $4, X5  // PSRLDQ in intel op code
 	PAND    X3, X5  // in_data_high -> X5
 
 	// shuffle table
