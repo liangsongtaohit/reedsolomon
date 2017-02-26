@@ -139,18 +139,6 @@ func BenchmarkEncode10x4x1M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 1024*1024)
 }
 
-func BenchmarkEncode28x4x1M(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 1024*1024)
-}
-
-func BenchmarkEncode28x4x4M(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 4*1024*1024)
-}
-
-func BenchmarkEncode28x4x16M(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 16*1024*1024)
-}
-
 func BenchmarkEncode10x4x4M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 4*1024*1024)
 }
@@ -169,6 +157,30 @@ func BenchmarkEncode17x3x4M(b *testing.B) {
 
 func BenchmarkEncode17x3x16M(b *testing.B) {
 	benchmarkEncode(b, 17, 3, 16*1024*1024)
+}
+
+func BenchmarkEncode28x4x1M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 1024*1024)
+}
+
+func BenchmarkEncode28x4x4M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 4*1024*1024)
+}
+
+func BenchmarkEncode28x4x16M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 16*1024*1024)
+}
+
+func BenchmarkEncode14x10x1M(b *testing.B) {
+	benchmarkEncode(b, 14, 10, 1024*1024)
+}
+
+func BenchmarkEncode14x10x4M(b *testing.B) {
+	benchmarkEncode(b, 14, 10, 4*1024*1024)
+}
+
+func BenchmarkEncode14x10x16M(b *testing.B) {
+	benchmarkEncode(b, 14, 10, 16*1024*1024)
 }
 
 func benchmarkEncode(b *testing.B, data, parity, size int) {
