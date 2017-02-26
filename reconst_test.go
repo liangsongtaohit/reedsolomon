@@ -119,3 +119,12 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 		r.Reconst(dp, lost, true)
 	}
 }
+
+
+func BenchmarkDecode28x4x16_M(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16776168, 4)
+}
+
+func BenchmarkDecode14x10x16_M(b *testing.B) {
+	benchmarkReconst(b, 14, 10, 16776168, 4)
+}
