@@ -60,6 +60,10 @@ func TestReconst(t *testing.T) {
 	}
 }
 
+func BenchmarkReconst28x4x16MRepair4(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16776168, 4)
+}
+
 func BenchmarkReconst10x4x16MRepair1(b *testing.B) {
 	benchmarkReconst(b, 10, 4, 16*1024*1024, 1)
 }

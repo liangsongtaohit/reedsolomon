@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"math/rand"
 	"testing"
+	"runtime"
 )
 
 func TestEncode(t *testing.T) {
@@ -191,4 +192,26 @@ func noasmGfVectMulXor(c byte, in, out []byte) {
 	for i := 0; i < len(in); i++ {
 		out[i] ^= mt[in[i]]
 	}
+}
+
+//------------
+
+func init(){
+	runtime.GOMAXPROCS(1)
+}
+
+func BenchmarkEncode28x4x16_M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 16776168)
+}
+
+func BenchmarkEncode14x10x16_M(b *testing.B) {
+	benchmarkEncode(b, 14, 10, 16776168)
+}
+
+func BenchmarkDecode28x4x16_M(b *testing.B) {
+	benchmarkReconstruct(b, 28, 4, 16776168)
+}
+
+func BenchmarkDecode14x10x16_M(b *testing.B) {
+	benchmarkReconstruct(b, 14, 10, 16776168)
 }
