@@ -13,8 +13,8 @@ TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 	VINSERTI128 $1, X0, Y0, Y0 // low_table -> ymm0
 	VINSERTI128 $1, X1, Y1, Y1 // high_table -> ymm1
 
-	MOVQ        in+48(FP), AX  // in_add -> AX
-	MOVQ        out+72(FP), BX // out_add -> BX
+	MOVQ        in+48(FP), AX  // in_addr -> AX
+	MOVQ        out+72(FP), BX // out_addr -> BX
 
 	// mask -> ymm
 	WORD $0x0fb2                    // MOV $0x0f, DL. Please don't use R8-R15 here, because it need one more byte for instruction decode
@@ -100,4 +100,6 @@ TEXT ·hasAVX2(SB), NOSPLIT, $0
 has:
 	MOVB $1, ret+0(FP)
 	RET
+
+
 

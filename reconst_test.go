@@ -104,7 +104,10 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	}
 	var lost []int
 	for i := 1; i <= repair; i++ {
-		lost = append(lost, rand.Intn(d+p))
+		r := rand.Intn(d+p)
+		if !have(lost, r) {
+			lost = append(lost, r)
+		}
 	}
 	for _, l := range lost {
 		dp[l] = make([]byte, size)
@@ -114,4 +117,14 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	for i := 0; i < b.N; i++ {
 		r.Reconst(dp, lost, true)
 	}
+}
+
+func have(s []int, i int) bool {
+	for _, v := range s {
+		if i == v {
+			return true
+		}
+		continue
+	}
+	return false
 }

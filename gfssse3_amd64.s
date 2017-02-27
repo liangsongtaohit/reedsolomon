@@ -2,14 +2,13 @@
 
 // func gfMulSSSE3(low, high, in, out []byte)
 TEXT ·gfMulSSSE3(SB), NOSPLIT, $0
-
 	// table -> xmm
 	MOVQ	low+0(FP), AX
 	MOVQ	high+24(FP), BX
 	MOVOU	(AX), X0
 	MOVOU	(BX), X1
 
-	// in out data_add -> reg
+	// in out data_addr -> reg
 	MOVQ	in+48(FP), AX
 	MOVQ	out+72(FP), BX
 
@@ -35,7 +34,7 @@ loop:
 	MOVOU	(AX), X4 // in_data -> X4
 	MOVOU   X4, X5  // in_data_copy -> X5
 	PAND    X3, X4  // in_data_low -> X4
-	PSRLQ   $4, X5  // PSRLDQ in intel op code
+	PSRLQ   $4, X5  // it's PSRLDQ in intel op code
 	PAND    X3, X5  // in_data_high -> X5
 
 	// shuffle table
