@@ -135,6 +135,34 @@ func TestSSSE3(t *testing.T) {
 	}
 }
 
+//func BenchmarkEncode10x4x8K(b *testing.B) {
+//benchmarkEncode(b, 10, 4, 8*1024)
+//}
+
+//func BenchmarkEncode10x4x16K(b *testing.B) {
+//benchmarkEncode(b, 10, 4, 16*1024)
+//}
+
+//func BenchmarkEncode10x4x32K(b *testing.B) {
+//benchmarkEncode(b, 10, 4, 32*1024)
+///}
+
+//func BenchmarkEncode10x4x64K(b *testing.B) {
+//	benchmarkEncode(b, 10, 4, 64*1024)
+//}
+
+//func BenchmarkEncode10x4x128K(b *testing.B) {
+//benchmarkEncode(b, 10, 4, 128*1024)
+//}
+
+//func BenchmarkEncode10x4x256K(b *testing.B) {
+//benchmarkEncode(b, 10, 4, 256*1024)
+//}
+
+//func BenchmarkEncode10x4x512K(b *testing.B) {
+//benchmarkEncode(b, 10, 4, 512*1024)
+//}
+
 func BenchmarkEncode10x4x1M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 1024*1024)
 }
@@ -293,5 +321,61 @@ func noasmGfVectMulXor(c byte, in, out []byte) {
 	mt := mulTable[c]
 	for i := 0; i < len(in); i++ {
 		out[i] ^= mt[in[i]]
+	}
+}
+
+// test no simd asm
+func TestNoSIMD(t *testing.T) {
+	d := 10
+	p := 1
+	size := 10
+	r, err := New(d, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// asm
+	dp := NewMatrix(d+p, size)
+	rand.Seed(0)
+	for i := 0; i < d; i++ {
+		fillRandom(dp[i])
+	}
+	err = r.nosimdEncode(dp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// mulTable
+	mDP := NewMatrix(d+p, size)
+	for i := 0; i < d; i++ {
+		mDP[i] = dp[i]
+	}
+	err = r.noasmEncode(mDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, asm := range dp {
+		if !bytes.Equal(asm, mDP[i]) {
+			t.Fatal("verify simd failed, no match noasm version; shards: ", i)
+		}
+	}
+}
+
+func BenchmarkNOSIMDncode28x4x16M(b *testing.B) {
+	benchmarkNOSIMDEncode(b, 28, 4, 16*1024*1024)
+}
+
+func benchmarkNOSIMDEncode(b *testing.B, data, parity, size int) {
+	r, err := New(data, parity)
+	if err != nil {
+		b.Fatal(err)
+	}
+	dp := NewMatrix(data+parity, size)
+	rand.Seed(0)
+	for i := 0; i < data; i++ {
+		fillRandom(dp[i])
+	}
+	b.SetBytes(int64(size * data))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.nosimdEncode(dp)
 	}
 }
