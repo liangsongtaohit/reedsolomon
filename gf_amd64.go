@@ -15,14 +15,14 @@ func gfMulXorSSSE3(low, high, in, out []byte)
 // use avx2 to calc remain
 func gfMulRemain(coeff byte, input, output []byte, size int) {
 	var done int
-	if size < 32 {
+	if size < 256 {
 		mt := mulTable[coeff]
 		for i := done; i < size; i++ {
 			output[i] = mt[input[i]]
 		}
 	} else {
 		gfMulAVX2(mulTableLow[coeff][:], mulTableHigh[coeff][:], input, output)
-		done = (size >> 5) << 5
+		done = (size >> 8) << 8
 		remain := size - done
 		if remain > 0 {
 			mt := mulTable[coeff]
@@ -36,14 +36,14 @@ func gfMulRemain(coeff byte, input, output []byte, size int) {
 // use avx2 to calc remain
 func gfMulRemainXor(coeff byte, input, output []byte, size int) {
 	var done int
-	if size < 32 {
+	if size < 256 {
 		mt := mulTable[coeff]
 		for i := done; i < size; i++ {
 			output[i] ^= mt[input[i]]
 		}
 	} else {
 		gfMulXorAVX2(mulTableLow[coeff][:], mulTableHigh[coeff][:], input, output)
-		done = (size >> 5) << 5
+		done = (size >> 8) << 8
 		remain := size - done
 		if remain > 0 {
 			mt := mulTable[coeff]

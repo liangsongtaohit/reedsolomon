@@ -23,7 +23,7 @@ TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 
 	// if done
 	MOVQ  in_len+56(FP), CX // in_len -> CX
-	SHRQ  $5, CX            // CX = CX >> 5 (calc 32bytes per loop)
+	SHRQ  $8, CX            // CX = CX >> 8 (calc 256bytes per loop)
 	TESTQ CX, CX            // bitwise AND on two operands,if result is 0 (it means no more data)，ZF flag set 1
 	JZ    done              // jump to done if ZF is 0
 
@@ -41,10 +41,87 @@ loop:
 	// gf add low, high 4-bit & output
 	VPXOR   Y6, Y7, Y3
 	VMOVDQU Y3, (BX)   // it will loss performance if use Non-Temporal Hint here, because "out" will be read for next data shard encoding
-
 	// next loop
-	ADDQ $32, AX
-	ADDQ $32, BX
+    ADDQ $32, AX
+    ADDQ $32, BX
+////2
+	VMOVDQU (AX), Y4
+    VPSRLQ  $4, Y4, Y5
+    VPAND   Y2, Y5, Y5
+    VPAND   Y2, Y4, Y4
+    VPSHUFB Y5, Y1, Y6
+    VPSHUFB Y4, Y0, Y7
+    VPXOR   Y6, Y7, Y3
+    VMOVDQU Y3, (BX)
+    ADDQ $32, AX
+    ADDQ $32, BX
+////3
+	VMOVDQU (AX), Y4
+    VPSRLQ  $4, Y4, Y5
+    VPAND   Y2, Y5, Y5
+    VPAND   Y2, Y4, Y4
+    VPSHUFB Y5, Y1, Y6
+    VPSHUFB Y4, Y0, Y7
+    VPXOR   Y6, Y7, Y3
+    VMOVDQU Y3, (BX)
+    ADDQ $32, AX
+    ADDQ $32, BX
+////4
+	VMOVDQU (AX), Y4
+    VPSRLQ  $4, Y4, Y5
+    VPAND   Y2, Y5, Y5
+    VPAND   Y2, Y4, Y4
+    VPSHUFB Y5, Y1, Y6
+    VPSHUFB Y4, Y0, Y7
+    VPXOR   Y6, Y7, Y3
+    VMOVDQU Y3, (BX)
+    ADDQ $32, AX
+    ADDQ $32, BX
+////5
+	VMOVDQU (AX), Y4
+    VPSRLQ  $4, Y4, Y5
+    VPAND   Y2, Y5, Y5
+    VPAND   Y2, Y4, Y4
+    VPSHUFB Y5, Y1, Y6
+    VPSHUFB Y4, Y0, Y7
+    VPXOR   Y6, Y7, Y3
+    VMOVDQU Y3, (BX)
+    ADDQ $32, AX
+    ADDQ $32, BX
+////6
+	VMOVDQU (AX), Y4
+    VPSRLQ  $4, Y4, Y5
+    VPAND   Y2, Y5, Y5
+    VPAND   Y2, Y4, Y4
+    VPSHUFB Y5, Y1, Y6
+    VPSHUFB Y4, Y0, Y7
+    VPXOR   Y6, Y7, Y3
+    VMOVDQU Y3, (BX)
+    ADDQ $32, AX
+    ADDQ $32, BX
+////7
+	VMOVDQU (AX), Y4
+    VPSRLQ  $4, Y4, Y5
+    VPAND   Y2, Y5, Y5
+    VPAND   Y2, Y4, Y4
+    VPSHUFB Y5, Y1, Y6
+    VPSHUFB Y4, Y0, Y7
+    VPXOR   Y6, Y7, Y3
+    VMOVDQU Y3, (BX)
+    ADDQ $32, AX
+    ADDQ $32, BX
+////8
+	VMOVDQU (AX), Y4
+    VPSRLQ  $4, Y4, Y5
+    VPAND   Y2, Y5, Y5
+    VPAND   Y2, Y4, Y4
+    VPSHUFB Y5, Y1, Y6
+    VPSHUFB Y4, Y0, Y7
+    VPXOR   Y6, Y7, Y3
+    VMOVDQU Y3, (BX)
+    ADDQ $32, AX
+    ADDQ $32, BX
+
 	SUBQ $1, CX  // it will affect ZF
 	JNZ  loop
 
@@ -67,7 +144,7 @@ TEXT ·gfMulXorAVX2(SB), NOSPLIT, $0
 	LONG $0x2069e3c4; WORD $0x00d2
 	VPBROADCASTB X2, Y2
 	MOVQ         in_len+56(FP), CX
-	SHRQ         $5, CX
+	SHRQ         $8, CX
 	TESTQ        CX, CX
 	JZ           done
 
@@ -84,6 +161,99 @@ loop:
 	VMOVDQU Y3, (BX)
 	ADDQ    $32, AX
 	ADDQ    $32, BX
+
+////2
+	VMOVDQU (AX), Y4
+	VMOVDQU (BX), Y3   // out_data -> Ymm
+	VPSRLQ  $4, Y4, Y5
+	VPAND   Y2, Y5, Y5
+	VPAND   Y2, Y4, Y4
+	VPSHUFB Y5, Y1, Y6
+	VPSHUFB Y4, Y0, Y7
+	VPXOR   Y6, Y7, Y6
+	VPXOR   Y6, Y3, Y3 // update result
+	VMOVDQU Y3, (BX)
+	ADDQ    $32, AX
+	ADDQ    $32, BX
+////3
+	VMOVDQU (AX), Y4
+	VMOVDQU (BX), Y3   // out_data -> Ymm
+	VPSRLQ  $4, Y4, Y5
+	VPAND   Y2, Y5, Y5
+	VPAND   Y2, Y4, Y4
+	VPSHUFB Y5, Y1, Y6
+	VPSHUFB Y4, Y0, Y7
+	VPXOR   Y6, Y7, Y6
+	VPXOR   Y6, Y3, Y3 // update result
+	VMOVDQU Y3, (BX)
+	ADDQ    $32, AX
+	ADDQ    $32, BX
+////4
+	VMOVDQU (AX), Y4
+	VMOVDQU (BX), Y3   // out_data -> Ymm
+	VPSRLQ  $4, Y4, Y5
+	VPAND   Y2, Y5, Y5
+	VPAND   Y2, Y4, Y4
+	VPSHUFB Y5, Y1, Y6
+	VPSHUFB Y4, Y0, Y7
+	VPXOR   Y6, Y7, Y6
+	VPXOR   Y6, Y3, Y3 // update result
+	VMOVDQU Y3, (BX)
+	ADDQ    $32, AX
+	ADDQ    $32, BX
+////5
+	VMOVDQU (AX), Y4
+	VMOVDQU (BX), Y3   // out_data -> Ymm
+	VPSRLQ  $4, Y4, Y5
+	VPAND   Y2, Y5, Y5
+	VPAND   Y2, Y4, Y4
+	VPSHUFB Y5, Y1, Y6
+	VPSHUFB Y4, Y0, Y7
+	VPXOR   Y6, Y7, Y6
+	VPXOR   Y6, Y3, Y3 // update result
+	VMOVDQU Y3, (BX)
+	ADDQ    $32, AX
+	ADDQ    $32, BX
+////6
+	VMOVDQU (AX), Y4
+	VMOVDQU (BX), Y3   // out_data -> Ymm
+	VPSRLQ  $4, Y4, Y5
+	VPAND   Y2, Y5, Y5
+	VPAND   Y2, Y4, Y4
+	VPSHUFB Y5, Y1, Y6
+	VPSHUFB Y4, Y0, Y7
+	VPXOR   Y6, Y7, Y6
+	VPXOR   Y6, Y3, Y3 // update result
+	VMOVDQU Y3, (BX)
+	ADDQ    $32, AX
+	ADDQ    $32, BX
+////7
+	VMOVDQU (AX), Y4
+	VMOVDQU (BX), Y3   // out_data -> Ymm
+	VPSRLQ  $4, Y4, Y5
+	VPAND   Y2, Y5, Y5
+	VPAND   Y2, Y4, Y4
+	VPSHUFB Y5, Y1, Y6
+	VPSHUFB Y4, Y0, Y7
+	VPXOR   Y6, Y7, Y6
+	VPXOR   Y6, Y3, Y3 // update result
+	VMOVDQU Y3, (BX)
+	ADDQ    $32, AX
+	ADDQ    $32, BX
+////8
+	VMOVDQU (AX), Y4
+	VMOVDQU (BX), Y3   // out_data -> Ymm
+	VPSRLQ  $4, Y4, Y5
+	VPAND   Y2, Y5, Y5
+	VPAND   Y2, Y4, Y4
+	VPSHUFB Y5, Y1, Y6
+	VPSHUFB Y4, Y0, Y7
+	VPXOR   Y6, Y7, Y6
+	VPXOR   Y6, Y3, Y3 // update result
+	VMOVDQU Y3, (BX)
+	ADDQ    $32, AX
+	ADDQ    $32, BX
+
 	SUBQ    $1, CX
 	JNZ     loop
 
