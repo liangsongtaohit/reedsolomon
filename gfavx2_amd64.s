@@ -45,14 +45,14 @@ loop:
     ADDQ $32, AX
     ADDQ $32, BX
 ////2
-	VMOVDQU (AX), Y4
-    VPSRLQ  $4, Y4, Y5
-    VPAND   Y2, Y5, Y5
-    VPAND   Y2, Y4, Y4
-    VPSHUFB Y5, Y1, Y6
-    VPSHUFB Y4, Y0, Y7
-    VPXOR   Y6, Y7, Y3
-    VMOVDQU Y3, (BX)
+	VMOVDQU (AX), Y8
+    VPSRLQ  $4, Y8, Y9
+    VPAND   Y2, Y9, Y9
+    VPAND   Y2, Y8, Y8
+    VPSHUFB Y9, Y1, Y10
+    VPSHUFB Y8, Y0, Y11
+    VPXOR   Y10, Y11, Y12
+    VMOVDQU Y12, (BX)
     ADDQ $32, AX
     ADDQ $32, BX
 ////3
@@ -67,16 +67,16 @@ loop:
     ADDQ $32, AX
     ADDQ $32, BX
 ////4
-	VMOVDQU (AX), Y4
-    VPSRLQ  $4, Y4, Y5
-    VPAND   Y2, Y5, Y5
-    VPAND   Y2, Y4, Y4
-    VPSHUFB Y5, Y1, Y6
-    VPSHUFB Y4, Y0, Y7
-    VPXOR   Y6, Y7, Y3
-    VMOVDQU Y3, (BX)
-    ADDQ $32, AX
-    ADDQ $32, BX
+	VMOVDQU (AX), Y8
+        VPSRLQ  $4, Y8, Y9
+        VPAND   Y2, Y9, Y9
+        VPAND   Y2, Y8, Y8
+        VPSHUFB Y9, Y1, Y10
+        VPSHUFB Y8, Y0, Y11
+        VPXOR   Y10, Y11, Y12
+        VMOVDQU Y12, (BX)
+        ADDQ $32, AX
+        ADDQ $32, BX
 ////5
 	VMOVDQU (AX), Y4
     VPSRLQ  $4, Y4, Y5
@@ -89,16 +89,16 @@ loop:
     ADDQ $32, AX
     ADDQ $32, BX
 ////6
-	VMOVDQU (AX), Y4
-    VPSRLQ  $4, Y4, Y5
-    VPAND   Y2, Y5, Y5
-    VPAND   Y2, Y4, Y4
-    VPSHUFB Y5, Y1, Y6
-    VPSHUFB Y4, Y0, Y7
-    VPXOR   Y6, Y7, Y3
-    VMOVDQU Y3, (BX)
-    ADDQ $32, AX
-    ADDQ $32, BX
+	VMOVDQU (AX), Y8
+        VPSRLQ  $4, Y8, Y9
+        VPAND   Y2, Y9, Y9
+        VPAND   Y2, Y8, Y8
+        VPSHUFB Y9, Y1, Y10
+        VPSHUFB Y8, Y0, Y11
+        VPXOR   Y10, Y11, Y12
+        VMOVDQU Y12, (BX)
+        ADDQ $32, AX
+        ADDQ $32, BX
 ////7
 	VMOVDQU (AX), Y4
     VPSRLQ  $4, Y4, Y5
@@ -111,16 +111,16 @@ loop:
     ADDQ $32, AX
     ADDQ $32, BX
 ////8
-	VMOVDQU (AX), Y4
-    VPSRLQ  $4, Y4, Y5
-    VPAND   Y2, Y5, Y5
-    VPAND   Y2, Y4, Y4
-    VPSHUFB Y5, Y1, Y6
-    VPSHUFB Y4, Y0, Y7
-    VPXOR   Y6, Y7, Y3
-    VMOVDQU Y3, (BX)
-    ADDQ $32, AX
-    ADDQ $32, BX
+	VMOVDQU (AX), Y8
+        VPSRLQ  $4, Y8, Y9
+        VPAND   Y2, Y9, Y9
+        VPAND   Y2, Y8, Y8
+        VPSHUFB Y9, Y1, Y10
+        VPSHUFB Y8, Y0, Y11
+        VPXOR   Y10, Y11, Y12
+        VMOVDQU Y12, (BX)
+        ADDQ $32, AX
+        ADDQ $32, BX
 
 	SUBQ $1, CX  // it will affect ZF
 	JNZ  loop
@@ -163,16 +163,16 @@ loop:
 	ADDQ    $32, BX
 
 ////2
-	VMOVDQU (AX), Y4
-	VMOVDQU (BX), Y3   // out_data -> Ymm
-	VPSRLQ  $4, Y4, Y5
-	VPAND   Y2, Y5, Y5
-	VPAND   Y2, Y4, Y4
-	VPSHUFB Y5, Y1, Y6
-	VPSHUFB Y4, Y0, Y7
-	VPXOR   Y6, Y7, Y6
-	VPXOR   Y6, Y3, Y3 // update result
-	VMOVDQU Y3, (BX)
+	VMOVDQU (AX), Y8
+	VMOVDQU (BX), Y9   // out_data -> Ymm
+	VPSRLQ  $4, Y8, Y10
+	VPAND   Y2, Y10, Y10
+	VPAND   Y2, Y8, Y8
+	VPSHUFB Y10, Y1, Y11
+	VPSHUFB Y8, Y0, Y12
+	VPXOR   Y11, Y12, Y13
+	VPXOR   Y9, Y13, Y13 // update result
+	VMOVDQU Y13, (BX)
 	ADDQ    $32, AX
 	ADDQ    $32, BX
 ////3
@@ -189,18 +189,18 @@ loop:
 	ADDQ    $32, AX
 	ADDQ    $32, BX
 ////4
-	VMOVDQU (AX), Y4
-	VMOVDQU (BX), Y3   // out_data -> Ymm
-	VPSRLQ  $4, Y4, Y5
-	VPAND   Y2, Y5, Y5
-	VPAND   Y2, Y4, Y4
-	VPSHUFB Y5, Y1, Y6
-	VPSHUFB Y4, Y0, Y7
-	VPXOR   Y6, Y7, Y6
-	VPXOR   Y6, Y3, Y3 // update result
-	VMOVDQU Y3, (BX)
-	ADDQ    $32, AX
-	ADDQ    $32, BX
+	VMOVDQU (AX), Y8
+    	VMOVDQU (BX), Y9   // out_data -> Ymm
+    	VPSRLQ  $4, Y8, Y10
+    	VPAND   Y2, Y10, Y10
+    	VPAND   Y2, Y8, Y8
+    	VPSHUFB Y10, Y1, Y11
+    	VPSHUFB Y8, Y0, Y12
+    	VPXOR   Y11, Y12, Y13
+    	VPXOR   Y9, Y13, Y13 // update result
+    	VMOVDQU Y13, (BX)
+    	ADDQ    $32, AX
+    	ADDQ    $32, BX
 ////5
 	VMOVDQU (AX), Y4
 	VMOVDQU (BX), Y3   // out_data -> Ymm
@@ -215,18 +215,18 @@ loop:
 	ADDQ    $32, AX
 	ADDQ    $32, BX
 ////6
-	VMOVDQU (AX), Y4
-	VMOVDQU (BX), Y3   // out_data -> Ymm
-	VPSRLQ  $4, Y4, Y5
-	VPAND   Y2, Y5, Y5
-	VPAND   Y2, Y4, Y4
-	VPSHUFB Y5, Y1, Y6
-	VPSHUFB Y4, Y0, Y7
-	VPXOR   Y6, Y7, Y6
-	VPXOR   Y6, Y3, Y3 // update result
-	VMOVDQU Y3, (BX)
-	ADDQ    $32, AX
-	ADDQ    $32, BX
+	VMOVDQU (AX), Y8
+    	VMOVDQU (BX), Y9   // out_data -> Ymm
+    	VPSRLQ  $4, Y8, Y10
+    	VPAND   Y2, Y10, Y10
+    	VPAND   Y2, Y8, Y8
+    	VPSHUFB Y10, Y1, Y11
+    	VPSHUFB Y8, Y0, Y12
+    	VPXOR   Y11, Y12, Y13
+    	VPXOR   Y9, Y13, Y13 // update result
+    	VMOVDQU Y13, (BX)
+    	ADDQ    $32, AX
+    	ADDQ    $32, BX
 ////7
 	VMOVDQU (AX), Y4
 	VMOVDQU (BX), Y3   // out_data -> Ymm
@@ -241,18 +241,18 @@ loop:
 	ADDQ    $32, AX
 	ADDQ    $32, BX
 ////8
-	VMOVDQU (AX), Y4
-	VMOVDQU (BX), Y3   // out_data -> Ymm
-	VPSRLQ  $4, Y4, Y5
-	VPAND   Y2, Y5, Y5
-	VPAND   Y2, Y4, Y4
-	VPSHUFB Y5, Y1, Y6
-	VPSHUFB Y4, Y0, Y7
-	VPXOR   Y6, Y7, Y6
-	VPXOR   Y6, Y3, Y3 // update result
-	VMOVDQU Y3, (BX)
-	ADDQ    $32, AX
-	ADDQ    $32, BX
+	VMOVDQU (AX), Y8
+    	VMOVDQU (BX), Y9   // out_data -> Ymm
+    	VPSRLQ  $4, Y8, Y10
+    	VPAND   Y2, Y10, Y10
+    	VPAND   Y2, Y8, Y8
+    	VPSHUFB Y10, Y1, Y11
+    	VPSHUFB Y8, Y0, Y12
+    	VPXOR   Y11, Y12, Y13
+    	VPXOR   Y9, Y13, Y13 // update result
+    	VMOVDQU Y13, (BX)
+    	ADDQ    $32, AX
+    	ADDQ    $32, BX
 
 	SUBQ    $1, CX
 	JNZ     loop
