@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"math/rand"
 	"testing"
+  "fmt"
+  "time"
 )
 
 func TestEncode(t *testing.T) {
@@ -163,36 +165,39 @@ func TestSSSE3(t *testing.T) {
 //benchmarkEncode(b, 10, 4, 512*1024)
 //}
 
-func BenchmarkEncode10x4x1M(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 1024*1024)
-}
+//func BenchmarkEncode10x4x1M(b *testing.B) {
+	//benchmarkEncode(b, 10, 4, 1024*1024)
+//}
 
-func BenchmarkEncode10x4x4M(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 4*1024*1024)
-}
+//func BenchmarkEncode10x4x4M(b *testing.B) {
+	//benchmarkEncode(b, 10, 4, 4*1024*1024)
+//}
 
 func BenchmarkEncode10x4x16M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 16*1024*1024)
 }
 
-func BenchmarkEncode17x3x1M(b *testing.B) {
-	benchmarkEncode(b, 17, 3, 1024*1024)
-}
+//func BenchmarkEncode17x3x1M(b *testing.B) {
+//	benchmarkEncode(b, 17, 3, 1024*1024)
+//}
 
-func BenchmarkEncode17x3x4M(b *testing.B) {
-	benchmarkEncode(b, 17, 3, 4*1024*1024)
-}
+//func BenchmarkEncode17x3x4M(b *testing.B) {
+//	benchmarkEncode(b, 17, 3, 4*1024*1024)
+//}
 
-func BenchmarkEncode17x3x16M(b *testing.B) {
-	benchmarkEncode(b, 17, 3, 16*1024*1024)
-}
+//func BenchmarkEncode17x3x16M(b *testing.B) {
+//	benchmarkEncode(b, 17, 3, 16*1024*1024)
+//}
 
-func BenchmarkEncode28x4x1M(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 1024*1024)
-}
+//func BenchmarkEncode28x4x1M(b *testing.B) {
+//	benchmarkEncode(b, 28, 4, 1024*1024)
+//}
 
-func BenchmarkEncode28x4x4M(b *testing.B) {
-	benchmarkEncode(b, 28, 4, 4*1024*1024)
+//func BenchmarkEncode28x4x4M(b *testing.B) {
+//	benchmarkEncode(b, 28, 4, 4*1024*1024)
+//}
+func BenchmarkEncode10x4x4K(b *testing.B) {
+  benchmarkEncode(b, 10, 4, 4*1024)
 }
 
 func BenchmarkEncode28x4x16M(b *testing.B) {
@@ -211,6 +216,27 @@ func BenchmarkEncode14x10x16M(b *testing.B) {
 	benchmarkEncode(b, 14, 10, 16*1024*1024)
 }
 
+func TestISA10x4x16M(t *testing.T) {
+  ISAway(t, 10, 4, 16*1024*1024)
+}
+func ISAway(t *testing.T, data, parity, size int) {
+  r, err := New(data, parity)
+  if err != nil {
+    t.Fatal(err)
+  }
+  dp := NewMatrix(data+parity, size)
+  rand.Seed(0)
+  for i := 0; i < data; i++ {
+    fillRandom(dp[i])
+  }
+  now := time.Now()
+  for i := 0; i < 30; i++ {
+    r.Encode(dp)
+  }
+  cost := time.Since(now)
+  io := data * size * 30 / 1000 / 1000
+  fmt.Println(cost, io)
+}
 func benchmarkEncode(b *testing.B, data, parity, size int) {
 	r, err := New(data, parity)
 	if err != nil {
