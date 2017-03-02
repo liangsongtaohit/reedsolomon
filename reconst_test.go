@@ -218,7 +218,6 @@ func benchmarkReconst_ConCurrency(b *testing.B, d, p, size, repair int) {
 		losts[i] = append(losts[i], lost...)
 	}
 
-	runtime.GOMAXPROCS(count)
 	b.SetBytes(int64(size * d * count))
 	b.ResetTimer()
 

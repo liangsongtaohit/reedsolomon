@@ -216,7 +216,6 @@ func BenchmarkEncode14x10x16M_ConCurrency(b *testing.B) {
 
 func benchmarkEncode_ConCurrency(b *testing.B, data, parity, size int) {
 	count := runtime.NumCPU()
-	fmt.Println("-------", count)
 	Instances := make([]*rs, count)
 	dps := make([]matrix, count)
 	for i := 0; i < count; i++ {
@@ -234,16 +233,17 @@ func benchmarkEncode_ConCurrency(b *testing.B, data, parity, size int) {
 		}
 	}
 
-	runtime.GOMAXPROCS(count)
 	b.SetBytes(int64(size * data * count))
 	b.ResetTimer()
 	var g sync.WaitGroup
-	for i := 0; i < count; i++ {
-		g.Add(1)
-		go func(i int) {
-			Instances[i].Encode(dps[i])
-			g.Done()
-		}(i)
+	for j := 0; j < b.N; j ++ {
+		for i := 0; i < count; i++ {
+			g.Add(1)
+			go func(i int) {
+				Instances[i].Encode(dps[i])
+				g.Done()
+			}(i)
+		}
 	}
 	g.Wait()
 }
