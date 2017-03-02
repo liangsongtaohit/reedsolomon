@@ -5,13 +5,10 @@ import (
 	"math/rand"
 	"testing"
 	"runtime"
+	"sync"
 )
 
 //------------
-
-func init(){
-	runtime.GOMAXPROCS(1)
-}
 
 func TestEncode(t *testing.T) {
 	size := 50000
@@ -200,10 +197,51 @@ func noasmGfVectMulXor(c byte, in, out []byte) {
 	}
 }
 
-func BenchmarkEncode28x4x16_M(b *testing.B) {
+func BenchmarkEncode28x4x16M(b *testing.B) {
 	benchmarkEncode(b, 28, 4, 16776168)
 }
 
-func BenchmarkEncode14x10x16_M(b *testing.B) {
+func BenchmarkEncode14x10x16M(b *testing.B) {
 	benchmarkEncode(b, 14, 10, 16776168)
+}
+
+func BenchmarkEncode28x4x16M_ConCurrency(b *testing.B) {
+	benchmarkEncode_ConCurrency(b, 28, 4, 16776168)
+}
+
+func BenchmarkEncode14x10x16M_ConCurrency(b *testing.B) {
+	benchmarkEncode_ConCurrency(b, 14, 10, 16776168)
+}
+
+func benchmarkEncode_ConCurrency(b *testing.B, data, parity, size int) {
+	count := runtime.NumCPU()
+	Instances := make([]*rs, count)
+	dps := make([]matrix, count)
+	for i := 0; i < count; i++ {
+		r, err := New(data, parity)
+		if err != nil {
+			b.Fatal(err)
+		}
+		Instances[i] = r
+	}
+	for i := 0; i < count; i++ {
+		dps[i] = NewMatrix(data+parity, size)
+		rand.Seed(0)
+		for j := 0; j < data; j++ {
+			fillRandom(dps[i][j])
+		}
+	}
+
+	runtime.GOMAXPROCS(count)
+	b.SetBytes(int64(size * data * count))
+	b.ResetTimer()
+	var g sync.WaitGroup
+	for i := 0; i < count; i++ {
+		g.Add(1)
+		go func(i int) {
+			Instances[i].Encode(dps[i])
+			g.Done()
+		}(i)
+	}
+	g.Wait()
 }

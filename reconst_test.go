@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"math/rand"
 	"testing"
+	"runtime"
+	"sync"
 )
 
 func TestReconst(t *testing.T) {
@@ -121,10 +123,111 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 }
 
 
-func BenchmarkDecode28x4x16_M(b *testing.B) {
+func BenchmarkDecode28x4x16M_1(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16776168, 1)
+}
+func BenchmarkDecode28x4x16M_2(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16776168, 2)
+}
+func BenchmarkDecode28x4x16M_3(b *testing.B) {
+	benchmarkReconst(b, 28, 4, 16776168, 3)
+}
+func BenchmarkDecode28x4x16M_4(b *testing.B) {
 	benchmarkReconst(b, 28, 4, 16776168, 4)
 }
 
-func BenchmarkDecode14x10x16_M(b *testing.B) {
+func BenchmarkDecode14x10x16M_1(b *testing.B) {
+	benchmarkReconst(b, 14, 10, 16776168, 1)
+}
+func BenchmarkDecode14x10x16M_2(b *testing.B) {
+	benchmarkReconst(b, 14, 10, 16776168, 2)
+}
+func BenchmarkDecode14x10x16M_3(b *testing.B) {
+	benchmarkReconst(b, 14, 10, 16776168, 3)
+}
+func BenchmarkDecode14x10x16M_4(b *testing.B) {
 	benchmarkReconst(b, 14, 10, 16776168, 4)
+}
+
+func BenchmarkDecode28x4x16M_1_ConCurrency(b *testing.B) {
+	benchmarkReconst_ConCurrency(b, 28, 4, 16776168, 1)
+}
+func BenchmarkDecode28x4x16M_2_ConCurrency(b *testing.B) {
+	benchmarkReconst_ConCurrency(b, 28, 4, 16776168, 2)
+}
+func BenchmarkDecode28x4x16M_3_ConCurrency(b *testing.B) {
+	benchmarkReconst_ConCurrency(b, 28, 4, 16776168, 3)
+}
+func BenchmarkDecode28x4x16M_4_ConCurrency(b *testing.B) {
+	benchmarkReconst_ConCurrency(b, 28, 4, 16776168, 4)
+}
+
+func BenchmarkDecode14x10x16M_1_ConCurrency(b *testing.B) {
+	benchmarkReconst_ConCurrency(b, 14, 10, 16776168, 1)
+}
+func BenchmarkDecode14x10x16M_2_ConCurrency(b *testing.B) {
+	benchmarkReconst_ConCurrency(b, 14, 10, 16776168, 2)
+}
+func BenchmarkDecode14x10x16M_3_ConCurrency(b *testing.B) {
+	benchmarkReconst_ConCurrency(b, 14, 10, 16776168, 3)
+}
+func BenchmarkDecode14x10x16M_4_ConCurrency(b *testing.B) {
+	benchmarkReconst_ConCurrency(b, 14, 10, 16776168, 4)
+}
+
+
+func benchmarkReconst_ConCurrency(b *testing.B, d, p, size, repair int) {
+	count := runtime.NumCPU()
+	Instances := make([]*rs, count)
+	dps := make([]matrix, count)
+	for i := 0; i < count; i++ {
+		r, err := New(d, p)
+		if err != nil {
+			b.Fatal(err)
+		}
+		Instances[i] = r
+	}
+	for i := 0; i < count; i++ {
+		dps[i] = NewMatrix(d+p, size)
+		rand.Seed(0)
+		for j := 0; j < d; j++ {
+			fillRandom(dps[i][j])
+		}
+	}
+
+	var g sync.WaitGroup
+	for i := 0; i < count; i++ {
+		g.Add(1)
+		go func(i int) {
+			Instances[i].Encode(dps[i])
+			g.Done()
+		}(i)
+	}
+	g.Wait()
+
+	losts := make([][]int, count)
+	for i := 0; i < count; i++ {
+		var lost []int
+		for i := 1; i <= repair; i++ {
+			lost = append(lost, rand.Intn(d+p))
+		}
+		for _, l := range lost {
+			dps[i][l] = make([]byte, size)
+		}
+		losts[i] = make([]int, 0)
+		losts[i] = append(losts[i], lost...)
+	}
+
+	runtime.GOMAXPROCS(count)
+	b.SetBytes(int64(size * d * count))
+	b.ResetTimer()
+
+	for i := 0; i < count; i++ {
+		g.Add(1)
+		go func(i int) {
+			Instances[i].Reconst(dps[i], losts[i], true)
+			g.Done()
+		}(i)
+	}
+	g.Wait()
 }
