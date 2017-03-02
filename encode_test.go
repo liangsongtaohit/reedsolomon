@@ -6,7 +6,6 @@ import (
 	"testing"
 	"runtime"
 	"sync"
-	"fmt"
 )
 
 //------------
