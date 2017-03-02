@@ -6,6 +6,7 @@ import (
 	"testing"
 	"runtime"
 	"sync"
+	"fmt"
 )
 
 //------------
@@ -215,6 +216,7 @@ func BenchmarkEncode14x10x16M_ConCurrency(b *testing.B) {
 
 func benchmarkEncode_ConCurrency(b *testing.B, data, parity, size int) {
 	count := runtime.NumCPU()
+	fmt.Println("-------", count)
 	Instances := make([]*rs, count)
 	dps := make([]matrix, count)
 	for i := 0; i < count; i++ {
