@@ -9,7 +9,7 @@ TEXT ·gfMulAVX2(SB), NOSPLIT, $0
 	MOVQ    highTable+24(FP), BX
 	VMOVDQU (AX), X0             // 128-bit Intel® AVX instructions operate on the lower 128 bits of the YMM registers and zero the upper 128 bits
 	VMOVDQU (BX), X1             // avoiding AVX-SSE Transition Penalties
-	// [0..0,X0] -> [X0, X0]
+	// little-end[0..0,X0] -> [X0, X0]
 	VINSERTI128 $1, X0, Y0, Y0 // low_table -> ymm0
 	VINSERTI128 $1, X1, Y1, Y1 // high_table -> ymm1
 

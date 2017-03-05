@@ -104,7 +104,7 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	}
 	var lost []int
 	for i := 1; i <= repair; i++ {
-		r := rand.Intn(d+p)
+		r := rand.Intn(d + p)
 		if !have(lost, r) {
 			lost = append(lost, r)
 		}
