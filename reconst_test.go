@@ -23,9 +23,9 @@ func TestReconst(t *testing.T) {
 	}
 	// restore encode result
 	store := NewMatrix(3, size)
-	store[0] = dp[0]
-	store[1] = dp[4]
-	store[2] = dp[12]
+	copy(store[0], dp[0])
+	copy(store[1], dp[4])
+	copy(store[2], dp[12])
 	dp[0] = make([]byte, size)
 	dp[4] = make([]byte, size)
 	dp[12] = make([]byte, size)
