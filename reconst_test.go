@@ -221,12 +221,14 @@ func benchmarkReconst_ConCurrency(b *testing.B, d, p, size, repair int) {
 	b.SetBytes(int64(size * d * count))
 	b.ResetTimer()
 
-	for i := 0; i < count; i++ {
-		g.Add(1)
-		go func(i int) {
-			Instances[i].Reconst(dps[i], losts[i], true)
-			g.Done()
-		}(i)
+	for j := 0; j < b.N; j++ {
+		for i := 0; i < count; i++ {
+			g.Add(1)
+			go func(i int) {
+				Instances[i].Reconst(dps[i], losts[i], true)
+				g.Done()
+			}(i)
+		}
 	}
 	g.Wait()
 }
