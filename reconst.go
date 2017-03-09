@@ -22,18 +22,18 @@ func (r *rs) Reconst(dp matrix, lost []int, repairParity bool) error {
 	sort.Ints(dataLost)
 	sort.Ints(parityLost)
 	if len(dataLost) > 0 {
-		err = reconstData(r.m, dp, dataLost, parityLost, r.data, size)
+		err = reconstData(r.m, dp, dataLost, parityLost, r.data, size, r.ins)
 		if err != nil {
 			return err
 		}
 	}
 	if len(parityLost) > 0 && repairParity {
-		reconstParity(r.m, dp, parityLost, r.data, size)
+		reconstParity(r.m, dp, parityLost, r.data, size, r.ins)
 	}
 	return nil
 }
 
-func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, size int) error {
+func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, size, ins int) error {
 	decodeMatrix := NewMatrix(numData, numData)
 	survivedMap := make(map[int]int)
 	numShards := len(encodeMatrix)
@@ -69,11 +69,15 @@ func reconstData(encodeMatrix, dp matrix, dataLost, parityLost []int, numData, s
 		gen[i] = decodeMatrix[l]
 		outputMap[i] = l
 	}
-	encodeRunner(gen, dp, numData, numDL, size, survivedMap, outputMap)
+	if ins == avx2 {
+		encodeRunner(gen, dp, numData, numDL, size, survivedMap, outputMap)
+	} else {
+		encodeRunnerS(gen, dp, numData, numDL, size, survivedMap, outputMap)
+	}
 	return nil
 }
 
-func reconstParity(encodeMatrix, dp matrix, parityLost []int, numData, size int) {
+func reconstParity(encodeMatrix, dp matrix, parityLost []int, numData, size, ins int) {
 	gen := NewMatrix(len(parityLost), numData)
 	outputMap := make(map[int]int)
 	for i := range gen {
@@ -85,7 +89,11 @@ func reconstParity(encodeMatrix, dp matrix, parityLost []int, numData, size int)
 	for i := 0; i < numData; i++ {
 		inMap[i] = i
 	}
-	encodeRunner(gen, dp, numData, len(parityLost), size, inMap, outputMap)
+	if ins == avx2 {
+		encodeRunner(gen, dp, numData, len(parityLost), size, inMap, outputMap)
+	} else {
+		encodeRunnerS(gen, dp, numData, len(parityLost), size, inMap, outputMap)
+	}
 }
 
 func splitLost(lost []int, d int) ([]int, []int) {

@@ -118,9 +118,9 @@ func encodeRemainS(start, size int, gen, dp matrix, numIn, numOut int, inMap, ou
 			k := outMap[oi]
 			c := gen[oi][i]
 			if i == 0 {
-				gfMulRemain(c, in[start:size], dp[k][start:size], do)
+				gfMulRemainS(c, in[start:size], dp[k][start:size], do)
 			} else {
-				gfMulRemainXor(c, in[start:size], dp[k][start:size], do)
+				gfMulRemainXorS(c, in[start:size], dp[k][start:size], do)
 			}
 		}
 	}
