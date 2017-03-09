@@ -6,6 +6,8 @@ import (
 	"testing"
 	"runtime"
 	"sync"
+	"time"
+	"fmt"
 )
 
 //------------
@@ -245,4 +247,40 @@ func benchmarkEncode_ConCurrency(b *testing.B, data, parity, size int) {
 		}
 	}
 	g.Wait()
+}
+
+func encode_ConCurrency(t testing.T,data, parity, size int) {
+	count := runtime.NumCPU()
+	Instances := make([]*rs, count)
+	dps := make([]matrix, count)
+	for i := 0; i < count; i++ {
+		r, err := New(data, parity)
+		if err != nil {
+			t.Fatal(err)
+		}
+		Instances[i] = r
+	}
+	for i := 0; i < count; i++ {
+		dps[i] = NewMatrix(data+parity, size)
+		rand.Seed(0)
+		for j := 0; j < data; j++ {
+			fillRandom(dps[i][j])
+		}
+	}
+
+	beginTime := time.Now()
+	var g sync.WaitGroup
+	for i := 0; i < count; i++ {
+		g.Add(1)
+		go func(i int) {
+			Instances[i].Encode(dps[i])
+			g.Done()
+		}(i)
+	}
+	g.Wait()
+	consume := time.Since(beginTime).Nanoseconds()
+	fmt.Printf("parity number:[%v + %v] with size [%v]\n", data, parity, size)
+	fmt.Println("----------------------------------------")
+	fmt.Println("corrency:", count)
+	fmt.Println("speed:", float32(count * data * size) * float32(time.Nanosecond) / float32(consume))
 }
