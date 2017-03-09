@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"math/rand"
 	"testing"
+	"runtime"
 )
 
 func TestEncode(t *testing.T) {
@@ -317,7 +318,7 @@ func benchmarkNOSIMDEncode(b *testing.B, data, parity, size int) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	dp := NewMatrix(data+parity, size)
+	dp := NewMatrix(data + parity, size)
 	rand.Seed(0)
 	for i := 0; i < data; i++ {
 		fillRandom(dp[i])
@@ -328,3 +329,12 @@ func benchmarkNOSIMDEncode(b *testing.B, data, parity, size int) {
 		r.nosimdEncode(dp)
 	}
 }
+
+func BenchmarkEncode28x4x16_M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 16776168)
+}
+
+func BenchmarkEncode14x10x16_M(b *testing.B) {
+	benchmarkEncode(b, 14, 10, 16776168)
+}
+
