@@ -125,8 +125,6 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	}
 }
 
-<<<<<<< HEAD
-
 func BenchmarkDecode28x4x16M_1(b *testing.B) {
 	benchmarkReconst(b, 28, 4, 16776168, 1)
 }
@@ -235,7 +233,7 @@ func benchmarkReconst_ConCurrency(b *testing.B, d, p, size, repair int) {
 		}
 	}
 	g.Wait()
-=======
+}
 func have(s []int, i int) bool {
 	for _, v := range s {
 		if i == v {
@@ -244,5 +242,4 @@ func have(s []int, i int) bool {
 		continue
 	}
 	return false
->>>>>>> 6cd67f7
 }
