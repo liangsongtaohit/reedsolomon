@@ -2,6 +2,8 @@
 
 Reed-Solomon Erasure Code engine in pure Go.
 
+More info in [my blogs](http://www.templex.xyz/blog/101/reedsolomon.html) (in Chinese)
+
 4GB/s per physics core
 
  * Coding over in GF(2^8).
@@ -9,7 +11,7 @@ Reed-Solomon Erasure Code engine in pure Go.
 
 It released by  [Klauspost ReedSolomon](https://github.com/klauspost/reedsolomon), with some optimizations/changes:
 
-1. Only support AVX2. I think SSSE3 maybe out of date
+1. Support AVX2 and SSSE3
 2. Use Cauchy matrix as generator matrix, we can use it directly.Vandermonde matrix need some operation for preserving the
 property that any square subset of rows is invertible(and I think there is a way to optimize inverse matrix's performance, I need some time to make it)
 3. There are a tool(tools/gentables.go) for generator Primitive Polynomial and it's log table, exp table, multiply table,
@@ -41,7 +43,7 @@ go get github.com/templexxx/reedsolomon
 
 # Usage
 
-This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/) or [my blogs](http://templex.xyz) (more info about this package there, but in Chinese).
+This section assumes you know the basics of Reed-Solomon encoding. A good start is this [Backblaze blog post](https://www.backblaze.com/blog/reed-solomon/).
 
 There are only two public function in the package: Encode, Reconst and NewMatrix
 
@@ -56,7 +58,7 @@ Performance depends mainly on:
 
 1. number of parity shards
 2. number of cores of CPU (if you want to use parallel version)
-3. CPU instruction extension(only support AVX2)
+3. CPU instruction extension(AVX2 or SSSE3)
 4. unit size of concurrence
 5. size of shards
 6. speed of memory(waste so much time on read/write mem, :D )
@@ -66,15 +68,16 @@ Single core work here:
 
 | Encode/Reconst | data+Parity/data+Lost    | Speed (MB/S) |
 |----------------|-------------------|--------------|
-| E              |      10+4       |4158.81  |
-| E              |      17+3       | 5450.13  |
-| R              |      10+1       | 10635.47 |
-| R              |      10+2       | 6963.70  |
-| R              |      10+3       | 5415.28  |
-| R              |      10+4      | 3469.50 |
-| R              |      17+1 | 10772.59  |
-| R              |      17+2 | 7159.81  |
-| R              |      17+3 | 5335.74  |
+| E              |      10+4       |4619.28  |
+| E              |      17+3       | 6086.20  |
+|E                |   28+4|          5002.81  |
+| R              |      10+1       | 11256.76 |
+| R              |      10+2       | 7365.13  |
+| R              |      10+3       | 7297.50  |
+| R              |      10+4      | 4436.40 |
+| R              |      17+1 | 11677.28  |
+| R              |      17+2 | 7736.39  |
+| R              |      17+3 | 5750.96  |
 
 # Links
 * [Klauspost ReedSolomon](https://github.com/klauspost/reedsolom)

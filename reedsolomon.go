@@ -13,11 +13,17 @@ type rs struct {
 	shards int    // Total number of shards
 	m      matrix // encoding matrix, identity matrix(upper) + generator matrix(lower)
 	gen    matrix // generator matrix(cauchy matrix)
+	ins    int    // Extensions Instruction(avx2 or ssse3)
 }
+
+const (
+	avx2  = 0
+	ssse3 = 1
+)
 
 var ErrTooFewShards = errors.New("reedsolomon: too few shards given for encoding")
 var ErrTooManyShards = errors.New("reedsolomon: too many shards given for encoding")
-var ErrNoAVX2 = errors.New("reedsolomon: can't support avx2")
+var ErrNoSupportINS = errors.New("reedsolomon: no avx2 or ssse3")
 
 // New : create a encoding matrix for encoding, reconstruction
 func New(d, p int) (*rs, error) {
@@ -25,13 +31,17 @@ func New(d, p int) (*rs, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !avx2() {
-		return nil, ErrNoAVX2
-	}
 	r := rs{
 		data:   d,
 		parity: p,
 		shards: d + p,
+	}
+	if hasAVX2() {
+		r.ins = avx2
+	} else if hasSSSE3() {
+		r.ins = ssse3
+	} else {
+		return &r, ErrNoSupportINS
 	}
 	e := genEncodeMatrix(r.shards, d) // create encoding matrix
 	r.m = e
@@ -53,4 +63,7 @@ func checkShards(d, p int) error {
 }
 
 //go:noescape
-func avx2() bool
+func hasAVX2() bool
+
+//go:noescape
+func hasSSSE3() bool

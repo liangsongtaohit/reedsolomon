@@ -25,9 +25,9 @@ func TestReconst(t *testing.T) {
 	}
 	// restore encode result
 	store := NewMatrix(3, size)
-	store[0] = dp[0]
-	store[1] = dp[4]
-	store[2] = dp[12]
+	copy(store[0], dp[0])
+	copy(store[1], dp[4])
+	copy(store[2], dp[12])
 	dp[0] = make([]byte, size)
 	dp[4] = make([]byte, size)
 	dp[12] = make([]byte, size)
@@ -110,7 +110,10 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	}
 	var lost []int
 	for i := 1; i <= repair; i++ {
-		lost = append(lost, rand.Intn(d+p))
+		r := rand.Intn(d + p)
+		if !have(lost, r) {
+			lost = append(lost, r)
+		}
 	}
 	for _, l := range lost {
 		dp[l] = make([]byte, size)
@@ -122,6 +125,7 @@ func benchmarkReconst(b *testing.B, d, p, size, repair int) {
 	}
 }
 
+<<<<<<< HEAD
 
 func BenchmarkDecode28x4x16M_1(b *testing.B) {
 	benchmarkReconst(b, 28, 4, 16776168, 1)
@@ -231,4 +235,14 @@ func benchmarkReconst_ConCurrency(b *testing.B, d, p, size, repair int) {
 		}
 	}
 	g.Wait()
+=======
+func have(s []int, i int) bool {
+	for _, v := range s {
+		if i == v {
+			return true
+		}
+		continue
+	}
+	return false
+>>>>>>> 6cd67f7
 }

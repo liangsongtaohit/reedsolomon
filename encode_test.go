@@ -13,6 +13,7 @@ import (
 //------------
 
 func TestEncode(t *testing.T) {
+
 	size := 50000
 	r, err := New(10, 3)
 	if err != nil {
@@ -71,6 +72,7 @@ func TestVerifyEncode(t *testing.T) {
 	}
 }
 
+// test avx2, if don't have it will test ssse3
 func TestASM(t *testing.T) {
 	d := 10
 	p := 4
@@ -105,28 +107,55 @@ func TestASM(t *testing.T) {
 	}
 }
 
-func BenchmarkEncode10x4x1M(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 1024*1024)
-}
-
-func BenchmarkEncode10x4x4M(b *testing.B) {
-	benchmarkEncode(b, 10, 4, 4*1024*1024)
+func TestSSSE3(t *testing.T) {
+	d := 10
+	p := 4
+	size := 65 * 1024
+	r, err := New(d, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r.ins = ssse3
+	// asm
+	dp := NewMatrix(d+p, size)
+	rand.Seed(0)
+	for i := 0; i < d; i++ {
+		fillRandom(dp[i])
+	}
+	err = r.Encode(dp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// mulTable
+	mDP := NewMatrix(d+p, size)
+	for i := 0; i < d; i++ {
+		mDP[i] = dp[i]
+	}
+	err = r.Encode(mDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, asm := range dp {
+		if !bytes.Equal(asm, mDP[i]) {
+			t.Fatal("verify asm failed, no match noasm version; shards: ", i)
+		}
+	}
 }
 
 func BenchmarkEncode10x4x16M(b *testing.B) {
 	benchmarkEncode(b, 10, 4, 16*1024*1024)
 }
 
-func BenchmarkEncode17x3x1M(b *testing.B) {
-	benchmarkEncode(b, 17, 3, 1024*1024)
+func BenchmarkEncode10x4x4K(b *testing.B) {
+	benchmarkEncode(b, 10, 4, 4*1024)
 }
 
-func BenchmarkEncode17x3x4M(b *testing.B) {
-	benchmarkEncode(b, 17, 3, 4*1024*1024)
+func BenchmarkEncode14x10x1M(b *testing.B) {
+	benchmarkEncode(b, 14, 10, 1024*1024)
 }
 
-func BenchmarkEncode17x3x16M(b *testing.B) {
-	benchmarkEncode(b, 17, 3, 16*1024*1024)
+func BenchmarkEncode14x10x4M(b *testing.B) {
+	benchmarkEncode(b, 14, 10, 4*1024*1024)
 }
 
 func benchmarkEncode(b *testing.B, data, parity, size int) {
@@ -143,6 +172,49 @@ func benchmarkEncode(b *testing.B, data, parity, size int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		r.Encode(dp)
+	}
+}
+
+func BenchmarkSSSE3Encode28x4x16M(b *testing.B) {
+	benchmarkSSSE3Encode(b, 28, 4, 16*1024*1024)
+}
+
+func benchmarkSSSE3Encode(b *testing.B, data, parity, size int) {
+	r, err := New(data, parity)
+	r.ins = ssse3
+	if err != nil {
+		b.Fatal(err)
+	}
+	dp := NewMatrix(data+parity, size)
+	rand.Seed(0)
+	for i := 0; i < data; i++ {
+		fillRandom(dp[i])
+	}
+	b.SetBytes(int64(size * data))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.Encode(dp)
+	}
+}
+
+func BenchmarkNOASMEncode28x4x16M(b *testing.B) {
+	benchmarkNOASMEncode(b, 28, 4, 16*1024*1024)
+}
+
+func benchmarkNOASMEncode(b *testing.B, data, parity, size int) {
+	r, err := New(data, parity)
+	if err != nil {
+		b.Fatal(err)
+	}
+	dp := NewMatrix(data+parity, size)
+	rand.Seed(0)
+	for i := 0; i < data; i++ {
+		fillRandom(dp[i])
+	}
+	b.SetBytes(int64(size * data))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.noasmEncode(dp)
 	}
 }
 
@@ -249,6 +321,10 @@ func benchmarkEncode_ConCurrency(b *testing.B, data, parity, size int) {
 	g.Wait()
 }
 
+func Encode28x4ConCurrency(t testing.T) {
+	encode_ConCurrency(t, 28, 4, 16776168)
+}
+
 func encode_ConCurrency(t testing.T,data, parity, size int) {
 	count := runtime.NumCPU()
 	Instances := make([]*rs, count)
@@ -282,5 +358,69 @@ func encode_ConCurrency(t testing.T,data, parity, size int) {
 	fmt.Printf("parity number:[%v + %v] with size [%v]\n", data, parity, size)
 	fmt.Println("----------------------------------------")
 	fmt.Println("corrency:", count)
-	fmt.Println("speed:", float32(count * data * size) * float32(time.Nanosecond) / float32(consume))
+	fmt.Println("speed:", float32(count * data * size) * float32(time.Second) / float32(consume) / float32(1024 * 1024))
 }
+// test no simd asm
+func TestNoSIMD(t *testing.T) {
+	d := 10
+	p := 1
+	size := 10
+	r, err := New(d, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// asm
+	dp := NewMatrix(d+p, size)
+	rand.Seed(0)
+	for i := 0; i < d; i++ {
+		fillRandom(dp[i])
+	}
+	err = r.nosimdEncode(dp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// mulTable
+	mDP := NewMatrix(d+p, size)
+	for i := 0; i < d; i++ {
+		mDP[i] = dp[i]
+	}
+	err = r.noasmEncode(mDP)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, asm := range dp {
+		if !bytes.Equal(asm, mDP[i]) {
+			t.Fatal("verify simd failed, no match noasm version; shards: ", i)
+		}
+	}
+}
+
+func BenchmarkNOSIMDncode28x4x16M(b *testing.B) {
+	benchmarkNOSIMDEncode(b, 28, 4, 16*1024*1024)
+}
+
+func benchmarkNOSIMDEncode(b *testing.B, data, parity, size int) {
+	r, err := New(data, parity)
+	if err != nil {
+		b.Fatal(err)
+	}
+	dp := NewMatrix(data + parity, size)
+	rand.Seed(0)
+	for i := 0; i < data; i++ {
+		fillRandom(dp[i])
+	}
+	b.SetBytes(int64(size * data))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.nosimdEncode(dp)
+	}
+}
+
+func BenchmarkEncode28x4x16_M(b *testing.B) {
+	benchmarkEncode(b, 28, 4, 16776168)
+}
+
+func BenchmarkEncode14x10x16_M(b *testing.B) {
+	benchmarkEncode(b, 14, 10, 16776168)
+}
+
